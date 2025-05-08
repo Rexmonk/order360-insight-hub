@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -38,6 +37,7 @@ import { format } from "date-fns";
 import { Calendar as CalendarIcon, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Order, getOrders } from "@/services/orderService";
+import { DateRange } from "react-day-picker";
 
 // Filter form component
 const FilterForm = ({ 
@@ -50,10 +50,7 @@ const FilterForm = ({
   const [channel, setChannel] = useState<string>('');
   const [businessProcess, setBusinessProcess] = useState<string>('');
   const [status, setStatus] = useState<string>('');
-  const [dateRange, setDateRange] = useState<{
-    from: Date | undefined;
-    to: Date | undefined;
-  }>({
+  const [dateRange, setDateRange] = useState<DateRange>({
     from: undefined,
     to: undefined,
   });

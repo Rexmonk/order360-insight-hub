@@ -173,13 +173,15 @@ const BpmnDiagram = () => {
         </div>
       </div>
       
-      <style jsx>{`
-        :global(.highlight) {
+      <style>
+        {`
+        .highlight {
           stroke: var(--highlight-stroke-color) !important;
           stroke-width: 3px !important;
           fill: var(--highlight-fill-color, rgba(226, 0, 116, 0.2)) !important;
         }
-      `}</style>
+        `}
+      </style>
     </Layout>
   );
 };
