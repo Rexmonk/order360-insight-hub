@@ -1,396 +1,169 @@
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { getOrderById } from "@/services/orderService";
+import Layout from "@/components/layout/Layout";
+import OrderDetailsView from "@/components/orders/OrderDetailsView";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getOrderById } from '@/services/orderService';
-import Layout from '@/components/layout/Layout';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { MobileOrder } from '@/types/order';
-
-// Import all order detail components
-import OrderSummaryCard from '@/components/orders/OrderSummaryCard';
-import OrderPriceCard from '@/components/orders/OrderPriceCard';
-import OrderItemsCard from '@/components/orders/OrderItemsCard';
-import OrderTimelineCard from '@/components/orders/OrderTimelineCard';
-import OrderCharacteristicsCard from '@/components/orders/OrderCharacteristicsCard';
-import OrderContactsCard from '@/components/orders/OrderContactsCard';
-import OrderRelatedPartiesCard from '@/components/orders/OrderRelatedPartiesCard';
-import OrderDocumentsCard from '@/components/orders/OrderDocumentsCard';
-
-// Sample mobile order JSON
-const sampleMobileOrderData: MobileOrder = {
-  "id": "954386e3-a3e9-4445-9b3a-863760e8fc68",
-  "externalId": "a52495a0-bc8d-4b4c-a8a3-ae6610cc7073",
-  "publicIdentifier": "2246727552",
-  "state": "acknowledged",
-  "stateDescription": "Order acknowledged",
-  "orderCaptureDate": "2025-04-15T12:10:59.846647242Z",
-  "channel": {
-    "id": "OneShop"
+// Sample JSON data for demonstration (in a real app this would come from an API)
+const sampleOrderData = {
+  id: "f8a24dbe-7139-4744-8de4-5f320d66b2f3",
+  publicIdentifier: "3009313235729",
+  orderType: "B2KA",
+  state: "acknowledged",
+  stateDescription: "",
+  orderCaptureDate: "2025-03-22T18:05:27.070131003Z",
+  channel: {
+    id: "OneApp",
   },
-  "relatedParties": [
+  orderItems: [
     {
-      "id": "aef24ee9-a7b0-4e28-968b-f167f9e21e63",
-      "role": "owner"
-    },
-    {
-      "entityReferredType": "Party",
-      "id": "OS000",
-      "role": "salesOrganisation"
-    }
-  ],
-  "contacts": [
-    {
-      "id": "b0dc298a-b527-4c00-84c1-088172e82a73",
-      "type": "mobile",
-      "role": {
-        "name": "main"
-      }
-    },
-    {
-      "id": "79f47a87-a5cd-490d-b703-7e21ded50971",
-      "type": "address",
-      "role": {
-        "name": "main"
-      }
-    },
-    {
-      "id": "873a5bc1-ae46-45ed-87eb-a793b1499c31",
-      "type": "email",
-      "role": {
-        "name": "main"
-      }
-    },
-    {
-      "id": "6d178adc-dd7f-4e68-a800-8e44b47b2cbd",
-      "type": "address",
-      "role": {
-        "name": "goodsDelivery"
-      }
-    },
-    {
-      "id": "b422debe-d626-4ab3-917d-1e114cd4e32e",
-      "type": "address",
-      "role": {
-        "name": "billing"
-      }
-    }
-  ],
-  "upfrontPrice": {
-    "priceType": "upfrontPrice",
-    "price": {
-      "taxIncludedAmount": 0,
-      "dutyFreeAmount": 0
-    },
-    "priceAlterations": [
-      {
-        "price": {}
-      }
-    ],
-    "paymentMethodRef": {}
-  },
-  "recurringPrices": [
-    {
-      "priceType": "recurringFee",
-      "recurringChargePeriod": "month",
-      "recurringChargeDuration": 1,
-      "recurringChargeOccurrence": 1,
-      "price": {
-        "taxIncludedAmount": 39.95,
-        "dutyFreeAmount": 0
+      id: "01",
+      description: "Auftrag eingegangen",
+      state: "acknowledged",
+      subStateDescription: "",
+      action: "add",
+      businessProcess: "addonManagement",
+      product: {
+        id: "MF_1632078716",
       },
-      "paymentMethodRef": {
-        "id": "67b9e3c2-b8fc-4939-b074-ba3728cae191",
-        "type": "bankAccountDebit"
-      }
-    },
-    {
-      "priceType": "recurringFee",
-      "recurringChargePeriod": "month",
-      "recurringChargeDuration": 1,
-      "recurringChargeOccurrence": -1,
-      "price": {
-        "taxIncludedAmount": 49.95,
-        "dutyFreeAmount": 0
+      productOffering: {
+        id: "DP_GDPDFF04",
       },
-      "paymentMethodRef": {
-        "id": "67b9e3c2-b8fc-4939-b074-ba3728cae191",
-        "type": "bankAccountDebit"
-      }
-    }
-  ],
-  "orderItems": [
-    {
-      "id": "8de53ecb9e4c40c7a606c8fb24aa864c",
-      "name": "MagentaMobil M 5. Gen",
-      "description": "Auftrag eingegangen",
-      "state": "acknowledged",
-      "subStateDescription": "",
-      "action": "add",
-      "businessProcess": "acquisition",
-      "quantity": 1,
-      "product": {},
-      "productOffering": {
-        "id": "MF_15476",
-        "name": "MagentaMobil M 5. Gen",
-        "group": "tariff",
-        "characteristics": [
-          {
-            "name": "selectedProductOfferingTerm",
-            "value": "agreement24",
-            "productSpecCharRelationship": []
-          },
-          {
-            "name": "DataVolumePostpaid5GLTE",
-            "value": "1",
-            "productSpecCharRelationship": []
-          },
-          {
-            "name": "telefonie_sms",
-            "value": "2",
-            "productSpecCharRelationship": []
-          },
-          {
-            "name": "AGB_ID",
-            "value": "2199",
-            "productSpecCharRelationship": []
-          },
-          {
-            "name": "additionalShortDescription",
-            "value": "Unbegrenztes Datenvolumen mit MagentaEINS | LTE Max und 5G",
-            "productSpecCharRelationship": []
-          },
-          {
-            "name": "isEsimEligible",
-            "value": "true",
-            "productSpecCharRelationship": []
-          }
-        ],
-        "categories": [
-          { "id": "MOBILEPOSTPAID" },
-          { "id": "mobile" },
-          { "id": "postpaid" },
-          { "id": "smartphone-tarife" },
-          { "id": "voice" }
-        ]
-      },
-      "recurringPrices": [
+      stateChanges: [
         {
-          "id": "MF_15476-OTC-Price",
-          "name": "oneTimeTariffFee",
-          "priceType": "activationFee",
-          "recurringChargePeriod": "month",
-          "recurringChargeDuration": 1,
-          "recurringChargeOccurrence": 1,
-          "unitOfMeasure": {},
-          "price": {
-            "currencyCode": "EUR",
-            "taxIncludedAmount": 39.95,
-            "dutyFreeAmount": 0
+          id: "01",
+          state: "acknowledged",
+          description: "Auftrag eingegangen",
+          subStateDescription: "",
+          validFor: {
+            startDateTime: "2025-03-22T18:05:27.072657402Z",
           },
-          "characteristics": []
         },
-        {
-          "id": "MF_15476-MRC-Price",
-          "name": "monthlyTariffFee",
-          "priceType": "recurringFee",
-          "recurringChargePeriod": "month",
-          "recurringChargeDuration": 1,
-          "recurringChargeOccurrence": -1,
-          "unitOfMeasure": {},
-          "price": {
-            "currencyCode": "EUR",
-            "taxIncludedAmount": 49.95,
-            "dutyFreeAmount": 0
-          },
-          "characteristics": []
-        }
       ],
-      "stateChanges": [
-        {
-          "id": "8de53ecb9e4c40c7a606c8fb24aa864c",
-          "state": "acknowledged",
-          "description": "Auftrag eingegangen",
-          "subStateDescription": "",
-          "validFor": {
-            "startDateTime": "2025-04-15T12:10:59.848755123Z"
-          }
-        }
-      ]
     },
     {
-      "id": "461843676827476ebc548ee3928cf5a8",
-      "name": "std_dlv_1",
-      "description": "Auftrag eingegangen",
-      "state": "acknowledged",
-      "subStateDescription": "",
-      "action": "add",
-      "quantity": 1,
-      "product": {},
-      "productOffering": {
-        "id": "std_dlv_offe",
-        "name": "std_dlv_1",
-        "group": "deliveryMethod",
-        "characteristics": []
+      id: "02",
+      description: "Auftrag eingegangen",
+      state: "acknowledged",
+      subStateDescription: "",
+      action: "add",
+      businessProcess: "addonManagement",
+      product: {
+        id: "MF_1632078798",
       },
-      "upfrontPrice": {
-        "id": "test",
-        "name": "basePrice",
-        "priceType": "upfrontPrice",
-        "unitOfMeasure": {},
-        "price": {
-          "currencyCode": "EUR",
-          "taxIncludedAmount": 0,
-          "dutyFreeAmount": 0
-        }
+      productOffering: {
+        id: "MF_GDPDFF04",
       },
-      "stateChanges": [
+      stateChanges: [
         {
-          "id": "461843676827476ebc548ee3928cf5a8",
-          "state": "acknowledged",
-          "description": "Auftrag eingegangen",
-          "subStateDescription": "",
-          "validFor": {
-            "startDateTime": "2025-04-15T12:10:59.848790994Z"
-          }
-        }
-      ]
+          id: "02",
+          state: "acknowledged",
+          description: "Auftrag eingegangen",
+          subStateDescription: "",
+          validFor: {
+            startDateTime: "2025-03-22T18:05:27.072706793Z",
+          },
+        },
+      ],
     },
+  ],
+  characteristics: [
     {
-      "id": "c418dcd3f89f40d8b759452770175072",
-      "name": "ebill",
-      "description": "Auftrag eingegangen",
-      "state": "acknowledged",
-      "subStateDescription": "",
-      "action": "add",
-      "quantity": 1,
-      "product": {},
-      "productOffering": {
-        "id": "bill_dlv_1",
-        "name": "ebill",
-        "group": "billDeliveryMethod",
-        "characteristics": []
+      name: "eCare.kkmNumber",
+      valueType: "string",
+      value: "3009313235729",
+    },
+  ],
+  stateChanges: [
+    {
+      id: "f8a24dbe-7139-4744-8de4-5f320d66b2f3",
+      state: "acknowledged",
+      description: "Auftrag eingegangen",
+      subStateDescription: "",
+      validFor: {
+        startDateTime: "2025-03-22T18:05:27.070131003Z",
       },
-      "stateChanges": [
-        {
-          "id": "c418dcd3f89f40d8b759452770175072",
-          "state": "acknowledged",
-          "description": "Auftrag eingegangen",
-          "subStateDescription": "",
-          "validFor": {
-            "startDateTime": "2025-04-15T12:10:59.848798884Z"
-          }
-        }
-      ]
-    }
+    },
+    {
+      id: "f8a24dbe-7139-4744-8de4-5f320d66b2f3",
+      state: "inProgress",
+      description: "Auftrag ist in Bearbeitung",
+      subStateDescription:
+        'Den Ausführungstermin finden Sie unten in den Details unter "Ausführung".',
+    },
+    {
+      id: "f8a24dbe-7139-4744-8de4-5f320d66b2f3",
+      state: "completed",
+      description: "Auftrag wird abgeschlossen",
+      subStateDescription: "",
+    },
   ],
-  "relatedEntities": [
-    {
-      "entityType": "shoppingCart",
-      "relationType": "isChildOf",
-      "relatedEntityId": "67f8df32f073cb614cf65869"
-    }
-  ],
-  "characteristics": [
-    {
-      "name": "cartType",
-      "valueType": "string",
-      "value": "acquisition"
-    },
-    {
-      "name": "PaymentVersion",
-      "valueType": "string",
-      "value": "V2"
-    },
-    {
-      "name": "orderURL",
-      "valueType": "string",
-      "value": "nulla52495a0-bc8d-4b4c-a8a3-ae6610cc7073"
-    },
-    {
-      "name": "utm_sales_organisation",
-      "valueType": "string",
-      "value": "OS000"
-    },
-    {
-      "name": "utm_advertising_banner",
-      "valueType": "string",
-      "value": "A123"
-    },
-    {
-      "name": "identificationVerificationType",
-      "valueType": "string",
-      "value": "offline"
-    },
-    {
-      "name": "eCare.kkmNumber",
-      "valueType": "string",
-      "value": "2246727552"
-    }
-  ],
-  "partyPrivacyProfiles": [],
-  "stateChanges": [
-    {
-      "id": "954386e3-a3e9-4445-9b3a-863760e8fc68",
-      "state": "acknowledged",
-      "description": "Auftrag eingegangen",
-      "subStateDescription": "",
-      "validFor": {
-        "startDateTime": "2025-04-15T12:10:59.846647242Z"
-      }
-    },
-    {
-      "id": "954386e3-a3e9-4445-9b3a-863760e8fc68",
-      "state": "inProgress",
-      "description": "Auftrag ist in Bearbeitung",
-      "subStateDescription": "Den Ausführungstermin finden Sie unten in den Details unter \"Ausführung\"."
-    },
-    {
-      "id": "954386e3-a3e9-4445-9b3a-863760e8fc68",
-      "state": "completed",
-      "description": "Auftrag wird abgeschlossen",
-      "subStateDescription": ""
-    }
-  ],
-  "documents": [
-    {
-      "id": "CO_a35d0b52-1991-4a52-a39a-e08b8656b1dd",
-      "name": "Consent"
-    }
-  ]
 };
 
 const OrderDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [order, setOrder] = useState<MobileOrder | null>(null);
+  const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // For demonstration, we'll use the sample JSON data directly
+    // For demonstration, we'll use both the mock service and our sample JSON data
     const fetchOrderDetails = async () => {
       try {
         // First try to get data from the order service
         if (id) {
           const orderData = getOrderById(id);
-          
+
           if (orderData) {
-            setOrder(orderData as unknown as MobileOrder);
+            // Transform the service data to match our expected format
+            const transformedOrder = {
+              ...orderData,
+              // Add properties from sample data that might not exist in our service
+              externalId: orderData.id,
+              stateDescription: `Order ${orderData.state.toLowerCase()}`,
+              orderCaptureDate: orderData.orderDate,
+              channel: { id: orderData.channel, name: orderData.channel },
+              orderItems: [
+                {
+                  id: `item-${orderData.id}`,
+                  description: orderData.offeringName,
+                  state: orderData.state.toLowerCase(),
+                  action: "add",
+                  businessProcess: orderData.businessProcess.toLowerCase(),
+                  quantity: 1,
+                  productOffering: {
+                    id: orderData.offeringId,
+                    name: orderData.offeringName,
+                    group: "tariff",
+                  },
+                },
+              ],
+              stateChanges: [
+                {
+                  id: orderData.id,
+                  state: orderData.state.toLowerCase(),
+                  description: `Order ${orderData.state.toLowerCase()}`,
+                  validFor: {
+                    startDateTime: orderData.orderDate,
+                  },
+                },
+              ],
+            };
+            setOrder(transformedOrder);
           } else {
-            // Use our sample mobile order data
-            setOrder(sampleMobileOrderData);
+            // Fallback to sample data (simulating API)
+            setOrder(sampleOrderData);
           }
         } else {
           setError("No order ID provided");
         }
       } catch (err) {
-        console.error('Error fetching order:', err);
-        setError('Error retrieving order details');
+        console.error("Error fetching order:", err);
+        setError("Error retrieving order details");
         // Fallback to sample data on error (for demo)
-        setOrder(sampleMobileOrderData);
+        setOrder(sampleOrderData);
       } finally {
         setLoading(false);
       }
@@ -425,7 +198,7 @@ const OrderDetails = () => {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
-            {error || 'Unable to retrieve order details'}
+            {error || "Unable to retrieve order details"}
           </AlertDescription>
         </Alert>
       </Layout>
@@ -434,44 +207,7 @@ const OrderDetails = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-6">
-        <div className="mb-6">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/order-overview')}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Orders
-          </Button>
-        </div>
-
-        <div className="space-y-6">
-          {/* Order Summary */}
-          <OrderSummaryCard order={order} />
-          
-          {/* Order Timeline */}
-          <OrderTimelineCard order={order} />
-          
-          {/* Order Items */}
-          <OrderItemsCard order={order} />
-          
-          {/* Order Pricing */}
-          <OrderPriceCard order={order} />
-          
-          {/* Related Parties */}
-          <OrderRelatedPartiesCard order={order} />
-          
-          {/* Contact Information */}
-          <OrderContactsCard order={order} />
-          
-          {/* Order Characteristics */}
-          <OrderCharacteristicsCard order={order} />
-          
-          {/* Documents */}
-          <OrderDocumentsCard order={order} />
-        </div>
-      </div>
+      <OrderDetailsView order={order} />
     </Layout>
   );
 };

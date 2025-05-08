@@ -25,15 +25,20 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       {/* /Bypass MSAL login for local copy JWT token from dev or uat */}
+
       {token ? (
         children
       ) : (
         <AuthenticatedTemplate>{children}</AuthenticatedTemplate>
       )}
 
-      <UnauthenticatedTemplate>
-        <Navigate to="/login" replace />
-      </UnauthenticatedTemplate>
+      {!token ? (
+        <UnauthenticatedTemplate>
+          <Navigate to="/login" replace />
+        </UnauthenticatedTemplate>
+      ) : (
+        ""
+      )}
     </>
   );
 };

@@ -1,6 +1,5 @@
-
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -41,16 +40,12 @@ import { Order, getOrders } from "@/services/orderService";
 import { DateRange } from "react-day-picker";
 
 // Filter form component
-const FilterForm = ({ 
-  onFilter 
-}: { 
-  onFilter: (filters: any) => void 
-}) => {
-  const [searchType, setSearchType] = useState<string>('orderId');
-  const [searchValue, setSearchValue] = useState<string>('');
-  const [channel, setChannel] = useState<string>('');
-  const [businessProcess, setBusinessProcess] = useState<string>('');
-  const [status, setStatus] = useState<string>('');
+const FilterForm = ({ onFilter }: { onFilter: (filters: any) => void }) => {
+  const [searchType, setSearchType] = useState<string>("orderId");
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [channel, setChannel] = useState<string>("");
+  const [businessProcess, setBusinessProcess] = useState<string>("");
+  const [status, setStatus] = useState<string>("");
   const [dateRange, setDateRange] = useState<DateRange>({
     from: undefined,
     to: undefined,
@@ -58,36 +53,40 @@ const FilterForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const filters = {
-      searchType: searchValue ? searchType : '',
+      searchType: searchValue ? searchType : "",
       search: searchValue,
       channel,
       businessProcess,
       state: status,
-      dateFrom: dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : '',
-      dateTo: dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : '',
+      dateFrom: dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "",
+      dateTo: dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "",
     };
-    
+
     onFilter(filters);
   };
 
   const resetFilters = () => {
-    setSearchType('orderId');
-    setSearchValue('');
-    setChannel('');
-    setBusinessProcess('');
-    setStatus('');
+    setSearchType("orderId");
+    setSearchValue("");
+    setChannel("");
+    setBusinessProcess("");
+    setStatus("");
     setDateRange({ from: undefined, to: undefined });
-    
+
     onFilter({});
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 mb-6 bg-white p-4 rounded-md border border-gray-200">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 mb-6 bg-white p-4 rounded-md border border-gray-200"
+    >
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Search Filter */}
         <div className="space-y-2 col-span-2">
+          <Label htmlFor="channel">Search</Label>
           <div className="flex items-center gap-2">
             <Select value={searchType} onValueChange={setSearchType}>
               <SelectTrigger className="w-[180px]">
@@ -99,7 +98,9 @@ const FilterForm = ({
                   <SelectItem value="partyId">Party ID</SelectItem>
                   <SelectItem value="offeringId">Offering ID</SelectItem>
                   <SelectItem value="profileId">Profile ID</SelectItem>
-                  <SelectItem value="salesOrganization">Sales Organization</SelectItem>
+                  <SelectItem value="salesOrganization">
+                    Sales Organization
+                  </SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -115,7 +116,7 @@ const FilterForm = ({
             </div>
           </div>
         </div>
-        
+
         {/* Channel Filter */}
         <div className="space-y-2">
           <Label htmlFor="channel">Channel</Label>
@@ -133,7 +134,7 @@ const FilterForm = ({
             </SelectContent>
           </Select>
         </div>
-        
+
         {/* Business Process Filter */}
         <div className="space-y-2">
           <Label htmlFor="businessProcess">Business Process</Label>
@@ -151,7 +152,7 @@ const FilterForm = ({
             </SelectContent>
           </Select>
         </div>
-        
+
         {/* Status Filter */}
         <div className="space-y-2">
           <Label htmlFor="status">Status</Label>
@@ -169,7 +170,7 @@ const FilterForm = ({
             </SelectContent>
           </Select>
         </div>
-        
+
         {/* Date Range Filter */}
         <div className="space-y-2">
           <Label>Filter by Date Range</Label>
@@ -208,14 +209,17 @@ const FilterForm = ({
             </PopoverContent>
           </Popover>
         </div>
-        
+
         <div className="flex items-end gap-2 col-span-2">
-          <Button type="submit" className="bg-primary hover:bg-primary-600 flex-1">
+          <Button
+            type="submit"
+            className="bg-primary hover:bg-primary-600 flex-1"
+          >
             Apply Filters
           </Button>
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             onClick={resetFilters}
             className="flex-1"
           >
@@ -234,40 +238,40 @@ const OrderTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [filters, setFilters] = useState({});
-  
+
   useEffect(() => {
     const fetchOrders = () => {
       const result = getOrders(currentPage, pageSize, filters);
       setOrders(result.orders);
       setTotalCount(result.totalCount);
     };
-    
+
     fetchOrders();
   }, [currentPage, pageSize, filters]);
-  
+
   const totalPages = Math.ceil(totalCount / pageSize);
-  
+
   const handleRowClick = (orderId: string) => {
     navigate(`/order-details/${orderId}`);
   };
-  
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
-  
+
   const applyFilters = (newFilters: any) => {
     setFilters(newFilters);
     setCurrentPage(1); // Reset to first page when applying new filters
   };
-  
+
   const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'MMM dd, yyyy');
+    return format(new Date(dateString), "MMM dd, yyyy");
   };
-  
+
   // Generate page links for pagination
   const getPageLinks = () => {
     const links = [];
-    
+
     // Always show first page
     links.push(
       <PaginationItem key="first">
@@ -279,7 +283,7 @@ const OrderTable = () => {
         </PaginationLink>
       </PaginationItem>
     );
-    
+
     // Add ellipsis if needed
     if (currentPage > 3) {
       links.push(
@@ -288,11 +292,15 @@ const OrderTable = () => {
         </PaginationItem>
       );
     }
-    
+
     // Add pages around current page
-    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+    for (
+      let i = Math.max(2, currentPage - 1);
+      i <= Math.min(totalPages - 1, currentPage + 1);
+      i++
+    ) {
       if (i === 1 || i === totalPages) continue; // Skip first and last page as they're always shown
-      
+
       links.push(
         <PaginationItem key={i}>
           <PaginationLink
@@ -304,7 +312,7 @@ const OrderTable = () => {
         </PaginationItem>
       );
     }
-    
+
     // Add ellipsis if needed
     if (currentPage < totalPages - 2) {
       links.push(
@@ -313,7 +321,7 @@ const OrderTable = () => {
         </PaginationItem>
       );
     }
-    
+
     // Always show last page if there's more than one page
     if (totalPages > 1) {
       links.push(
@@ -327,14 +335,14 @@ const OrderTable = () => {
         </PaginationItem>
       );
     }
-    
+
     return links;
   };
 
   return (
     <div>
       <FilterForm onFilter={applyFilters} />
-      
+
       <div className="rounded-md border bg-white">
         <Table>
           <TableHeader>
@@ -353,8 +361,8 @@ const OrderTable = () => {
           <TableBody>
             {orders.length > 0 ? (
               orders.map((order) => (
-                <TableRow 
-                  key={order.id} 
+                <TableRow
+                  key={order.id}
                   className="cursor-pointer hover:bg-gray-50"
                   onClick={() => handleRowClick(order.id)}
                 >
@@ -363,14 +371,18 @@ const OrderTable = () => {
                   <TableCell>{order.channel}</TableCell>
                   <TableCell>{order.businessProcess}</TableCell>
                   <TableCell>
-                    <span 
+                    <span
                       className={cn(
                         "px-2 py-1 text-xs font-medium rounded-full",
-                        order.state === 'Completed' && "bg-green-100 text-green-800",
-                        order.state === 'In Progress' && "bg-blue-100 text-blue-800",
-                        order.state === 'Canceled' && "bg-red-100 text-red-800",
-                        order.state === 'Created' && "bg-gray-100 text-gray-800",
-                        order.state === 'Accepted' && "bg-purple-100 text-purple-800",
+                        order.state === "Completed" &&
+                          "bg-green-100 text-green-800",
+                        order.state === "In Progress" &&
+                          "bg-blue-100 text-blue-800",
+                        order.state === "Canceled" && "bg-red-100 text-red-800",
+                        order.state === "Created" &&
+                          "bg-gray-100 text-gray-800",
+                        order.state === "Accepted" &&
+                          "bg-purple-100 text-purple-800"
                       )}
                     >
                       {order.state}
@@ -384,7 +396,10 @@ const OrderTable = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-gray-500">
+                <TableCell
+                  colSpan={9}
+                  className="text-center py-8 text-gray-500"
+                >
                   No orders found. Try adjusting your filters.
                 </TableCell>
               </TableRow>
@@ -392,27 +407,36 @@ const OrderTable = () => {
           </TableBody>
         </Table>
       </div>
-      
+
       {totalCount > 0 && (
         <div className="flex items-center justify-between mt-4">
           <div className="text-sm text-gray-500">
-            Showing {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, totalCount)} of {totalCount} orders
+            Showing {(currentPage - 1) * pageSize + 1}-
+            {Math.min(currentPage * pageSize, totalCount)} of {totalCount}{" "}
+            orders
           </div>
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious 
+                <PaginationPrevious
                   onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                  className={cn(currentPage === 1 && "pointer-events-none opacity-50")}
+                  className={cn(
+                    currentPage === 1 && "pointer-events-none opacity-50"
+                  )}
                 />
               </PaginationItem>
-              
+
               {getPageLinks()}
-              
+
               <PaginationItem>
-                <PaginationNext 
-                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                  className={cn(currentPage === totalPages && "pointer-events-none opacity-50")}
+                <PaginationNext
+                  onClick={() =>
+                    handlePageChange(Math.min(totalPages, currentPage + 1))
+                  }
+                  className={cn(
+                    currentPage === totalPages &&
+                      "pointer-events-none opacity-50"
+                  )}
                 />
               </PaginationItem>
             </PaginationContent>
