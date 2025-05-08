@@ -1,10 +1,13 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { MsalProvider, AuthenticatedTemplate, UnauthenticatedTemplate } from "@azure/msal-react";
+import {
+  MsalProvider,
+  AuthenticatedTemplate,
+  UnauthenticatedTemplate,
+} from "@azure/msal-react";
 import msalInstance from "./services/authService";
 import { queryClient } from "./hooks/useApi";
 
@@ -14,14 +17,20 @@ import OrderDetails from "./pages/OrderDetails";
 import BpmnDiagram from "./pages/BpmnDiagram";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import { useLocalStorage } from "./hooks/use-localstorage";
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const [token, setToken] = useLocalStorage("token", "");
   return (
     <>
-      <AuthenticatedTemplate>
-        {children}
-      </AuthenticatedTemplate>
+      {/* /Bypass MSAL login for local copy JWT token from dev or uat */}
+      {token ? (
+        children
+      ) : (
+        <AuthenticatedTemplate>{children}</AuthenticatedTemplate>
+      )}
+
       <UnauthenticatedTemplate>
         <Navigate to="/login" replace />
       </UnauthenticatedTemplate>
@@ -39,28 +48,40 @@ const App = () => (
           <Routes>
             {/* Public routes */}
             <Route path="/login" element={<Login />} />
-            
+
             {/* Protected routes */}
-            <Route path="/" element={
-              <ProtectedRoute>
-                <Index />
-              </ProtectedRoute>
-            } />
-            <Route path="/order-overview" element={
-              <ProtectedRoute>
-                <OrderOverview />
-              </ProtectedRoute>
-            } />
-            <Route path="/order-details/:id" element={
-              <ProtectedRoute>
-                <OrderDetails />
-              </ProtectedRoute>
-            } />
-            <Route path="/bpmn-diagram/:id" element={
-              <ProtectedRoute>
-                <BpmnDiagram />
-              </ProtectedRoute>
-            } />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Index />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/order-overview"
+              element={
+                <ProtectedRoute>
+                  <OrderOverview />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/order-details/:id"
+              element={
+                <ProtectedRoute>
+                  <OrderDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/bpmn-diagram/:id"
+              element={
+                <ProtectedRoute>
+                  <BpmnDiagram />
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
