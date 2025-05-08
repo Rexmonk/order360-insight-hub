@@ -2,7 +2,8 @@
 import { useEffect, useState } from 'react';
 import { User, LogOut, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { login, logout, getActiveAccount } from '@/services/authService';
+import { login, logout, getActiveAccount, setupTokenRefresh } from '@/services/authService';
+import { useNavigate } from 'react-router-dom';
 
 interface NavbarProps {
   toggleSidebar: () => void;
@@ -11,20 +12,28 @@ interface NavbarProps {
 
 const Navbar = ({ toggleSidebar, isSidebarCollapsed }: NavbarProps) => {
   const [userName, setUserName] = useState<string>('Guest User');
+  const navigate = useNavigate();
   
   useEffect(() => {
     const account = getActiveAccount();
     if (account?.name) {
       setUserName(account.name);
+      setupTokenRefresh();
     }
   }, []);
   
   const handleLogout = () => {
     logout();
+    navigate('/login');
   };
   
-  const handleLogin = () => {
-    login();
+  const handleLogin = async () => {
+    await login();
+    const account = getActiveAccount();
+    if (account?.name) {
+      setUserName(account.name);
+      setupTokenRefresh();
+    }
   };
 
   return (

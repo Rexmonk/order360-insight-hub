@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -123,7 +124,7 @@ const FilterForm = ({
               <SelectValue placeholder="All Channels" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Channels</SelectItem>
+              <SelectItem value="all">All Channels</SelectItem>
               <SelectItem value="Online">Online</SelectItem>
               <SelectItem value="Mobile">Mobile</SelectItem>
               <SelectItem value="Retail">Retail</SelectItem>
@@ -141,7 +142,7 @@ const FilterForm = ({
               <SelectValue placeholder="All Processes" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Processes</SelectItem>
+              <SelectItem value="all">All Processes</SelectItem>
               <SelectItem value="New Order">New Order</SelectItem>
               <SelectItem value="Change Order">Change Order</SelectItem>
               <SelectItem value="Cancel Order">Cancel Order</SelectItem>
@@ -159,7 +160,7 @@ const FilterForm = ({
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Statuses</SelectItem>
+              <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="Created">Created</SelectItem>
               <SelectItem value="Accepted">Accepted</SelectItem>
               <SelectItem value="In Progress">In Progress</SelectItem>
