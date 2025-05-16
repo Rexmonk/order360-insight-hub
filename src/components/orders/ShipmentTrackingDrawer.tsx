@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { format } from "date-fns";
 import { Truck } from "lucide-react";
 import { 
@@ -14,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "@/components/ui/use-toast";
 
 // Define types based on the schema you provided
 interface ShipmentAddress {
@@ -159,8 +161,59 @@ interface ShipmentTrackingDrawerProps {
   orderId?: string;
 }
 
+// Simulate API call to fetch shipment tracking data
+const fetchShipmentTracking = async (orderId: string): Promise<ShipmentTracking[]> => {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // Simulate API success (90% of the time) or error
+  const shouldSucceed = Math.random() < 0.9;
+  
+  if (!shouldSucceed) {
+    throw new Error("Failed to fetch shipment tracking data. Please try again.");
+  }
+  
+  return mockShipmentTracking;
+};
+
 const ShipmentTrackingDrawer = ({ orderId }: ShipmentTrackingDrawerProps) => {
-  const shipments = mockShipmentTracking;
+  const [shipments, setShipments] = useState<ShipmentTracking[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open && orderId) {
+      loadShipmentData();
+    }
+  };
+  
+  const loadShipmentData = async () => {
+    if (!orderId) return;
+    
+    setIsLoading(true);
+    
+    try {
+      const data = await fetchShipmentTracking(orderId);
+      setShipments(data);
+      toast({
+        title: "Success",
+        description: "Shipment tracking data loaded successfully",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("Error fetching shipment tracking:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to load shipment tracking data",
+        variant: "destructive",
+      });
+      // Close the drawer on error
+      setIsOpen(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   const formatDate = (dateString: string) => {
     try {
@@ -206,7 +259,7 @@ const ShipmentTrackingDrawer = ({ orderId }: ShipmentTrackingDrawerProps) => {
   };
 
   return (
-    <Sheet>
+    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
         <Button variant="default" className="flex items-center gap-2">
           <Truck className="h-4 w-4" />
@@ -221,7 +274,14 @@ const ShipmentTrackingDrawer = ({ orderId }: ShipmentTrackingDrawerProps) => {
           </SheetDescription>
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-120px)] mt-6">
-          {shipments.length > 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="space-y-2 text-center">
+                <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+                <p className="text-sm text-gray-500">Loading tracking information...</p>
+              </div>
+            </div>
+          ) : shipments.length > 0 ? (
             <div className="space-y-6">
               {shipments.map((shipment) => (
                 <div key={shipment.id} className="space-y-4">

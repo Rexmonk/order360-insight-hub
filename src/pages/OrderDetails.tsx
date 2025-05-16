@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import ShipmentTrackingDrawer from "@/components/orders/ShipmentTrackingDrawer";
+import { Toaster } from "@/components/ui/toaster";
 
 const OrderDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -51,6 +52,7 @@ const OrderDetails = () => {
 
   return (
     <Layout>
+      <Toaster />
       {isLoading ? (
         <div className="h-96 flex items-center justify-center">
           <p className="text-gray-500">Loading order details...</p>
