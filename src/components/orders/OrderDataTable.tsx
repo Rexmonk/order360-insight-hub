@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import {
@@ -9,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { Order, OrderItem, StateItem } from "@/services/orderService";
+import { Order, OrderItem, StateItem } from "@/types/order";
 
 interface OrderDataTableProps {
   orders: Order[];
@@ -52,7 +53,7 @@ const OrderDataTable = ({ orders }: OrderDataTableProps) => {
   ): string => {
     const values = new Set<string>();
 
-    orderItems.forEach((item) => {
+    orderItems?.forEach((item) => {
       if (type === "businessProcess") {
         const bp = item.businessProcess?.trim();
         if (bp) {
@@ -109,10 +110,10 @@ const OrderDataTable = ({ orders }: OrderDataTableProps) => {
                   {order.publicIdentifier ? order.publicIdentifier : "-"}
                 </TableCell>
                 <TableCell className="text-nowrap">
-                  {order.channel.id || "-"}
+                  {order.channel?.id || "-"}
                 </TableCell>
                 <TableCell>
-                  {getUniqueOrderValues(order.orderItems, "businessProcess")}
+                  {getUniqueOrderValues(order.orderItems || [], "businessProcess")}
                 </TableCell>
                 <TableCell>
                   <span
@@ -133,13 +134,13 @@ const OrderDataTable = ({ orders }: OrderDataTableProps) => {
                 </TableCell>
                 <TableCell>
                   {getUniqueOrderValues(
-                    order.orderItems,
+                    order.orderItems || [],
                     "productOfferingId"
                   ) || "-"}
                 </TableCell>
                 <TableCell>
                   {getUniqueOrderValues(
-                    order.orderItems,
+                    order.orderItems || [],
                     "productOfferingName"
                   ) || "-"}
                 </TableCell>
@@ -151,7 +152,7 @@ const OrderDataTable = ({ orders }: OrderDataTableProps) => {
                     : "-"}
                 </TableCell>
                 <TableCell className="text-nowrap">
-                  {getLastUpdateDate(order?.stateChanges) || "-"}
+                  {getLastUpdateDate(order?.stateChanges || []) || "-"}
                 </TableCell>
               </TableRow>
             ))

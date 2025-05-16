@@ -34,6 +34,7 @@ import { TooltipArrow, TooltipContent } from "@radix-ui/react-tooltip";
 import { useState } from "react";
 import { Collapsible, CollapsibleTrigger } from "../ui/collapsible";
 import { CollapsibleContent } from "@radix-ui/react-collapsible";
+import ShipmentTrackingDrawer from "./ShipmentTrackingDrawer";
 
 interface OrderDetailsViewProps {
   order: any;
@@ -119,13 +120,16 @@ const OrderDetailsView = ({ order }: OrderDetailsViewProps) => {
           <h1 className="text-2xl font-bold">Order Details</h1>
         </div>
 
-        <Button
-          className="bg-primary hover:bg-primary/90"
-          onClick={() => navigate(`/bpmn-diagram/${order.id}`)}
-        >
-          <FileCog className="mr-2 h-4 w-4" />
-          View Process Diagram
-        </Button>
+        <div className="flex flex-col md:flex-row gap-2">
+          <ShipmentTrackingDrawer orderId={order.id} />
+          <Button
+            className="bg-primary hover:bg-primary/90"
+            onClick={() => navigate(`/bpmn-diagram/${order.id}`)}
+          >
+            <FileCog className="mr-2 h-4 w-4" />
+            View Process Diagram
+          </Button>
+        </div>
       </div>
 
       {/* Order Header Info */}
