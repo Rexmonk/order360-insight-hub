@@ -1,9 +1,15 @@
 
-import { useEffect, useState } from 'react';
-import { User, LogOut, Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { login, logout, getActiveAccount, setupTokenRefresh } from '@/services/authService';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Menu, Bell, User as UserIcon } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface NavbarProps {
   toggleSidebar: () => void;
@@ -11,79 +17,61 @@ interface NavbarProps {
 }
 
 const Navbar = ({ toggleSidebar, isSidebarCollapsed }: NavbarProps) => {
-  const [userName, setUserName] = useState<string>('Guest User');
   const navigate = useNavigate();
-  
-  useEffect(() => {
-    const account = getActiveAccount();
-    if (account?.name) {
-      setUserName(account.name);
-      setupTokenRefresh();
-    }
-  }, []);
-  
+  const [user] = useState({
+    name: 'John Doe',
+    email: 'john@example.com',
+    initials: 'JD'
+  });
+
   const handleLogout = () => {
-    logout();
+    localStorage.removeItem('token');
     navigate('/login');
-  };
-  
-  const handleLogin = async () => {
-    await login();
-    const account = getActiveAccount();
-    if (account?.name) {
-      setUserName(account.name);
-      setupTokenRefresh();
-    }
   };
 
   return (
-    <nav className="bg-white border-b border-gray-200 px-4 py-2.5 fixed w-full z-20 top-0 left-0 shadow-sm">
-      <div className="flex flex-wrap justify-between items-center">
+    <nav className="fixed top-0 left-0 right-0 z-10 bg-white shadow h-14 flex items-center px-4">
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleSidebar}
+          className="text-gray-500"
+          aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          <Menu size={20} />
+        </Button>
         <div className="flex items-center">
-          <button 
-            onClick={toggleSidebar}
-            type="button"
-            className="btn-icon mr-3"
-            aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-          
-          <div className="flex items-center">
-            <span className="text-primary font-bold text-2xl">Order</span>
-            <span className="text-gray-800 font-bold text-2xl">360</span>
-          </div>
+          <span className="text-primary font-bold text-xl">Order</span>
+          <span className="text-gray-800 font-bold text-xl">360</span>
         </div>
-        
-        <div className="flex items-center">
-          <div className="hidden md:flex items-center">
-            <span className="text-sm font-medium text-gray-700 mr-4">
-              {userName}
-            </span>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={userName === 'Guest User' ? handleLogin : undefined}
-              className="rounded-full"
-              aria-label="User profile"
-            >
-              <User className="h-5 w-5" />
+      </div>
+
+      <div className="ml-auto flex items-center gap-2">
+        <Button variant="ghost" size="icon" className="text-gray-500 relative">
+          <Bell size={20} />
+          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+        </Button>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="gap-2">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback>{user.initials}</AvatarFallback>
+              </Avatar>
+              <span className="hidden md:inline">{user.name}</span>
             </Button>
-            
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={handleLogout}
-              className="rounded-full"
-              aria-label="Logout"
-            >
-              <LogOut className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem>
+              <UserIcon className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </nav>
   );

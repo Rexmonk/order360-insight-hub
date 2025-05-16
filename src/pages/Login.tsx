@@ -1,43 +1,28 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login, getActiveAccount, setupTokenRefresh } from '@/services/authService';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
+import { toast } from 'sonner';
 
 const Login = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Check if user is already logged in
-    const account = getActiveAccount();
-    if (account) {
-      setupTokenRefresh();
-      navigate('/order-overview');
-    }
-  }, [navigate]);
 
   const handleLogin = async () => {
     try {
       setIsLoading(true);
-      setError(null);
       
-      await login();
-      
-      // Check if login was successful
-      const account = getActiveAccount();
-      if (account) {
-        // Set up silent token refresh
-        setupTokenRefresh();
-        navigate('/order-overview');
-      } else {
-        setError("Login failed. Please try again.");
-      }
+      // Simulate login for now - we'll replace with actual auth later
+      setTimeout(() => {
+        // Store a simple token in local storage
+        localStorage.setItem('token', 'simulated-auth-token');
+        toast.success('Login successful');
+        navigate('/');
+      }, 1000);
     } catch (err) {
       console.error("Login error:", err);
-      setError("An error occurred during login. Please try again.");
+      toast.error("An error occurred during login. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -54,18 +39,12 @@ const Login = () => {
           Sign in to your account
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Use your Microsoft account to sign in
+          Use your account to sign in
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {error && (
-            <div className="mb-4 bg-red-50 text-red-800 p-3 rounded-md border border-red-200">
-              {error}
-            </div>
-          )}
-
           <div className="space-y-6">
             <div>
               <Button
@@ -84,7 +63,7 @@ const Login = () => {
                 ) : (
                   <span className="flex items-center">
                     <User className="mr-2 h-5 w-5" />
-                    Sign in with Microsoft
+                    Sign in
                   </span>
                 )}
               </Button>

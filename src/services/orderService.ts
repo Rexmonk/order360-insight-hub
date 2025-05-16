@@ -1,256 +1,143 @@
 
-import { crudService } from "./crudService";
-import type { Order } from "@/types/order";
+// Mock data for our dashboard
 
-// Get a specific order by ID
-export const getOrder = async (id: string): Promise<Order> => {
-  try {
-    return await crudService.get('/order-management/v1/order/' + id, {
-      mockData: {
-        id: id,
-        state: "InProgress",
-        channel: { id: "Web" },
-        orderItems: []
-      },
-      useMock: true
-    });
-  } catch (error) {
-    console.error("Error fetching order:", error);
-    throw error;
-  }
-};
+// Order types
+export interface Order {
+  id: string;
+  orderNumber: string;
+  customer: string;
+  orderDate: string;
+  status: 'pending' | 'accepted' | 'in-progress' | 'completed' | 'canceled';
+  total: number;
+  channel: string;
+  items: number;
+  businessProcess: string;
+}
 
-// Get the order metrics (counts by status)
+// Mock getOrderMetrics
 export const getOrderMetrics = async () => {
-  try {
-    return await crudService.get('/order-metrics', {
-      mockData: {
-        totalOrders: 125,
-        acceptedOrders: 32,
-        inProgressOrders: 48,
-        canceledOrders: 10,
-        completedOrders: 35
-      },
-      useMock: true
-    });
-  } catch (error) {
-    console.error("Error fetching order metrics:", error);
-    throw error;
-  }
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 800));
+  
+  return {
+    totalOrders: 1254,
+    acceptedOrders: 845,
+    inProgressOrders: 238,
+    canceledOrders: 42,
+    completedOrders: 968
+  };
 };
 
-// Get channel distribution data
+// Mock getChannelDistribution
 export const getChannelDistribution = async () => {
-  try {
-    return await crudService.get('/channel-distribution', {
-      mockData: [
-        { name: "Web", count: 65, percentage: 52 },
-        { name: "Mobile App", count: 42, percentage: 33.6 },
-        { name: "Call Center", count: 18, percentage: 14.4 }
-      ],
-      useMock: true
-    });
-  } catch (error) {
-    console.error("Error fetching channel distribution:", error);
-    throw error;
-  }
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 600));
+  
+  return [
+    { name: 'Online', count: 756, percentage: 60.3 },
+    { name: 'In-Store', count: 312, percentage: 24.9 },
+    { name: 'Phone', count: 186, percentage: 14.8 }
+  ];
 };
 
-// Get business process distribution data
+// Mock getBusinessDistribution
 export const getBusinessDistribution = async () => {
-  try {
-    return await crudService.get('/business-distribution', {
-      mockData: [
-        { name: "New Sales", count: 70, percentage: 56 },
-        { name: "Upgrades", count: 25, percentage: 20 },
-        { name: "Renewals", count: 18, percentage: 14.4 },
-        { name: "Returns", count: 12, percentage: 9.6 }
-      ],
-      useMock: true
-    });
-  } catch (error) {
-    console.error("Error fetching business distribution:", error);
-    throw error;
-  }
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 700));
+  
+  return [
+    { name: 'Standard', count: 825, percentage: 65.8 },
+    { name: 'Express', count: 286, percentage: 22.8 },
+    { name: 'Custom', count: 143, percentage: 11.4 }
+  ];
 };
 
-// Get weekly trends data
+// Mock getWeeklyTrends
 export const getWeeklyTrends = async () => {
-  try {
-    return await crudService.get('/weekly-trends', {
-      mockData: [
-        { name: "Mon", orders: 12 },
-        { name: "Tue", orders: 19 },
-        { name: "Wed", orders: 15 },
-        { name: "Thu", orders: 22 },
-        { name: "Fri", orders: 28 },
-        { name: "Sat", orders: 15 },
-        { name: "Sun", orders: 8 }
-      ],
-      useMock: true
-    });
-  } catch (error) {
-    console.error("Error fetching weekly trends:", error);
-    throw error;
-  }
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  return [
+    { name: 'Week 1', orders: 245 },
+    { name: 'Week 2', orders: 268 },
+    { name: 'Week 3', orders: 293 },
+    { name: 'Week 4', orders: 312 },
+    { name: 'Week 5', orders: 286 },
+    { name: 'Week 6', orders: 324 }
+  ];
 };
 
-// Get BPMN diagram XML for a specific order
-export const getBpmnDiagramXml = async (orderId: string) => {
-  try {
-    return await crudService.get('/bpmn-diagram/' + orderId, {
-      mockData: `<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
-  <bpmn:process id="Process_1" isExecutable="true">
-    <bpmn:startEvent id="StartEvent_1" name="Order Created">
-      <bpmn:outgoing>Flow_1</bpmn:outgoing>
-    </bpmn:startEvent>
-    <bpmn:task id="Activity_Validate" name="Validate Order">
-      <bpmn:incoming>Flow_1</bpmn:incoming>
-      <bpmn:outgoing>Flow_2</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Activity_Validate" />
-    <bpmn:task id="Activity_Process" name="Process Order">
-      <bpmn:incoming>Flow_2</bpmn:incoming>
-      <bpmn:outgoing>Flow_3</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:sequenceFlow id="Flow_2" sourceRef="Activity_Validate" targetRef="Activity_Process" />
-    <bpmn:endEvent id="Event_End" name="Order Completed">
-      <bpmn:incoming>Flow_3</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_3" sourceRef="Activity_Process" targetRef="Event_End" />
-  </bpmn:process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-        <dc:Bounds x="152" y="102" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="134" y="145" width="73" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1_di" bpmnElement="Activity_Validate">
-        <dc:Bounds x="240" y="80" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_2_di" bpmnElement="Activity_Process">
-        <dc:Bounds x="400" y="80" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_End_di" bpmnElement="Event_End">
-        <dc:Bounds x="562" y="102" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="537" y="145" width="86" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
-        <di:waypoint x="188" y="120" />
-        <di:waypoint x="240" y="120" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
-        <di:waypoint x="340" y="120" />
-        <di:waypoint x="400" y="120" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
-        <di:waypoint x="500" y="120" />
-        <di:waypoint x="562" y="120" />
-      </bpmndi:BPMNEdge>
-    </bpmndi:BPMNPlane>
-  </bpmndi:BPMNDiagram>
-</bpmn:definitions>`,
-      useMock: true
-    });
-  } catch (error) {
-    console.error("Error fetching BPMN diagram:", error);
-    throw error;
-  }
+// Mock getOrders
+export const getOrders = async () => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // Generate mock orders
+  const orders: Order[] = Array.from({ length: 50 }).map((_, index) => {
+    const id = `order-${index + 1000}`;
+    const statuses = ['pending', 'accepted', 'in-progress', 'completed', 'canceled'] as const;
+    const channels = ['Online', 'In-Store', 'Phone'];
+    const businesses = ['Standard', 'Express', 'Custom'];
+    
+    return {
+      id,
+      orderNumber: `ORD-${Math.floor(10000 + Math.random() * 90000)}`,
+      customer: `Customer ${index + 1}`,
+      orderDate: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toISOString(),
+      status: statuses[Math.floor(Math.random() * statuses.length)],
+      total: Math.floor(100 + Math.random() * 900),
+      channel: channels[Math.floor(Math.random() * channels.length)],
+      items: Math.floor(1 + Math.random() * 10),
+      businessProcess: businesses[Math.floor(Math.random() * businesses.length)]
+    };
+  });
+  
+  return orders;
 };
 
-// Get shipment tracking data for an order
-export const getShipmentTracking = async (orderId: string) => {
-  try {
-    return await crudService.get('/shipment-tracking/' + orderId, {
-      mockData: [{
-        id: "ST-" + orderId + "-001",
-        href: "https://api.example.com/shipment/" + orderId,
-        carrier: "FastShip Express",
-        trackingCode: "FS" + Math.floor(10000000 + Math.random() * 90000000),
-        carrierTrackingUrl: "https://track.fastship.example/track",
-        trackingDate: new Date().toISOString(),
-        status: "in transit",
-        statusChangeDate: new Date().toISOString(),
-        statusChangeReason: "Package is on the way to destination",
-        weight: 2.5,
-        estimatedDeliveryDate: new Date(Date.now() + 2*24*60*60*1000).toISOString(),
-        addressFrom: {
-          id: "ADDR-001",
-          href: "https://api.example.com/address/001",
-          city: "San Francisco",
-          stateOrProvince: "CA",
-          country: "USA",
-          postcode: "94105"
-        },
-        addressTo: {
-          id: "ADDR-002",
-          href: "https://api.example.com/address/002",
-          city: "New York",
-          stateOrProvince: "NY",
-          country: "USA",
-          postcode: "10001"
-        },
-        checkpoint: [
-          {
-            status: "picked up",
-            message: "Package picked up by courier",
-            date: new Date(Date.now() - 2*24*60*60*1000).toISOString(),
-            checkPost: "Origin Facility",
-            city: "San Francisco",
-            stateOrProvince: "CA",
-            country: "USA"
-          },
-          {
-            status: "in transit",
-            message: "Package has left origin facility",
-            date: new Date(Date.now() - 1*24*60*60*1000).toISOString(),
-            checkPost: "Distribution Center",
-            city: "Denver",
-            stateOrProvince: "CO",
-            country: "USA"
-          },
-          {
-            status: "in transit",
-            message: "Package arrived at destination facility",
-            date: new Date().toISOString(),
-            checkPost: "Destination Facility",
-            city: "New York",
-            stateOrProvince: "NY",
-            country: "USA"
-          }
-        ],
-        order: [
-          {
-            id: orderId,
-            href: "https://api.example.com/order/" + orderId,
-            name: "Customer Order",
-            referredType: "Order"
-          }
-        ],
-        relatedCustomer: {
-          id: "CUST-001",
-          href: "https://api.example.com/customer/001",
-          name: "John Doe",
-          description: "Premium Customer"
-        },
-        createDate: new Date(Date.now() - 3*24*60*60*1000).toISOString(),
-        shippingOrderItems: [
-          {
-            id: 1,
-            name: "iPhone 15 Pro 128GB",
-            characteristics: []
-          }
-        ]
-      }],
-      useMock: true
-    });
-  } catch (error) {
-    console.error("Error fetching shipment tracking:", error);
-    throw error;
-  }
+// Mock getOrder
+export const getOrder = async (id: string) => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 800));
+  
+  // Generate a mock order with the given ID
+  const statuses = ['pending', 'accepted', 'in-progress', 'completed', 'canceled'] as const;
+  const channels = ['Online', 'In-Store', 'Phone'];
+  const businesses = ['Standard', 'Express', 'Custom'];
+  
+  return {
+    id,
+    orderNumber: `ORD-${Math.floor(10000 + Math.random() * 90000)}`,
+    customer: `Customer Name`,
+    customerEmail: 'customer@example.com',
+    customerPhone: '+1 (555) 123-4567',
+    orderDate: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toISOString(),
+    status: statuses[Math.floor(Math.random() * statuses.length)],
+    total: Math.floor(100 + Math.random() * 900),
+    channel: channels[Math.floor(Math.random() * channels.length)],
+    items: [
+      { id: '1', name: 'Product A', quantity: 2, price: 49.99 },
+      { id: '2', name: 'Product B', quantity: 1, price: 129.99 }
+    ],
+    businessProcess: businesses[Math.floor(Math.random() * businesses.length)],
+    shippingAddress: {
+      street: '123 Main St',
+      city: 'Anytown',
+      state: 'CA',
+      zipCode: '12345',
+      country: 'USA'
+    },
+    billingAddress: {
+      street: '123 Main St',
+      city: 'Anytown',
+      state: 'CA',
+      zipCode: '12345',
+      country: 'USA'
+    },
+    timeline: [
+      { date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), status: 'created', note: 'Order created' },
+      { date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), status: 'accepted', note: 'Order accepted' },
+      { date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), status: 'in-progress', note: 'Processing order' }
+    ]
+  };
 };
