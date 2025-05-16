@@ -168,3 +168,6 @@ export const DualTrendChart = ({
     </Card>
   );
 };
+
+// Set default export to SingleTrendChart
+export default SingleTrendChart;

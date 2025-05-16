@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import MetricsCard from '@/components/dashboard/MetricsCard';
 import DistributionChart from '@/components/dashboard/DistributionChart';
-import TrendChart from '@/components/dashboard/TrendChart';
+import { SingleTrendChart } from '@/components/dashboard/TrendChart';
 import { getOrderMetrics, getChannelDistribution, getBusinessDistribution, getWeeklyTrends } from '@/services/orderService';
 
 const Index = () => {
@@ -67,26 +67,22 @@ const Index = () => {
               <MetricsCard 
                 title="Accepted" 
                 value={metrics.acceptedOrders} 
-                className="md:col-span-1" 
-                status="accepted"
+                className="md:col-span-1"
               />
               <MetricsCard 
                 title="In Progress" 
                 value={metrics.inProgressOrders} 
                 className="md:col-span-1"
-                status="in-progress" 
               />
               <MetricsCard 
                 title="Completed" 
                 value={metrics.completedOrders} 
                 className="md:col-span-1"
-                status="completed" 
               />
               <MetricsCard 
                 title="Canceled" 
                 value={metrics.canceledOrders} 
                 className="md:col-span-1"
-                status="canceled" 
               />
             </div>
             
@@ -102,9 +98,12 @@ const Index = () => {
             </div>
             
             <div className="grid grid-cols-1 gap-6">
-              <TrendChart 
+              <SingleTrendChart 
                 title="Weekly Order Trends" 
-                data={weeklyTrends}
+                data={{
+                  weeks: weeklyTrends.map(item => item.name),
+                  data: weeklyTrends.map(item => item.orders)
+                }}
               />
             </div>
           </>
