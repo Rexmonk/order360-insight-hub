@@ -100,6 +100,7 @@ const OrderDataTable = ({ orders }: OrderDataTableProps) => {
               <TableRow
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => handleRowClick(order)}
+                key={index}
               >
                 <TableCell className="font-medium text-nowrap">
                   {order.id ? order.id : "-"}
