@@ -2,25 +2,73 @@
 import { format } from "date-fns";
 import { Truck } from "lucide-react";
 import { 
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger
-} from "@/components/ui/drawer";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { ShipmentTracking } from "@/types/shipment";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+// Define types based on the schema you provided
+interface ShipmentAddress {
+  id: string;
+  fullAddressName?: string;
+  streetNr?: string;
+  streetName?: string;
+  city?: string;
+  stateOrProvince?: string;
+  country?: string;
+  postcode?: string;
+}
+
+interface Checkpoint {
+  status: string;
+  message: string;
+  date: string;
+  checkPost: string;
+  city: string;
+  stateOrProvince: string;
+  country: string;
+}
+
+interface ShippingOrderItem {
+  id: number;
+  name: string;
+}
+
+interface ShipmentTracking {
+  id: string;
+  carrier: string;
+  trackingCode: string;
+  carrierTrackingUrl?: string;
+  trackingDate: string;
+  status: string;
+  statusChangeDate: string;
+  statusChangeReason?: string;
+  weight: number;
+  estimatedDeliveryDate: string;
+  addressFrom: ShipmentAddress;
+  addressTo: ShipmentAddress;
+  checkpoint: Checkpoint[];
+  relatedCustomer?: {
+    id: string;
+    name: string;
+    description?: string;
+  };
+  createDate: string;
+  shippingOrderItems: ShippingOrderItem[];
+}
+
 // Mock data for the shipment tracking
 const mockShipmentTracking: ShipmentTracking[] = [
   {
     id: "ST12345",
-    href: "string",
     carrier: "FedEx Express",
     trackingCode: "FDX9876543210",
     carrierTrackingUrl: "https://www.fedex.com/track/9876543210",
@@ -32,7 +80,6 @@ const mockShipmentTracking: ShipmentTracking[] = [
     estimatedDeliveryDate: "2025-05-18T16:00:00.000Z",
     addressFrom: {
       id: "ADR-001",
-      href: "string",
       fullAddressName: "Central Warehouse",
       streetName: "Distribution Road",
       streetNr: "100",
@@ -43,7 +90,6 @@ const mockShipmentTracking: ShipmentTracking[] = [
     },
     addressTo: {
       id: "ADR-002",
-      href: "string",
       fullAddressName: "Customer Address",
       streetName: "Main Street",
       streetNr: "123",
@@ -60,8 +106,7 @@ const mockShipmentTracking: ShipmentTracking[] = [
         checkPost: "Atlanta Hub",
         city: "Atlanta",
         stateOrProvince: "GA",
-        country: "USA",
-        characteristics: []
+        country: "USA"
       },
       {
         status: "in-transit",
@@ -70,8 +115,7 @@ const mockShipmentTracking: ShipmentTracking[] = [
         checkPost: "Atlanta Hub",
         city: "Atlanta",
         stateOrProvince: "GA",
-        country: "USA",
-        characteristics: []
+        country: "USA"
       },
       {
         status: "in-transit",
@@ -80,8 +124,7 @@ const mockShipmentTracking: ShipmentTracking[] = [
         checkPost: "Chicago Hub",
         city: "Chicago",
         stateOrProvince: "IL",
-        country: "USA",
-        characteristics: []
+        country: "USA"
       },
       {
         status: "in-transit",
@@ -90,8 +133,7 @@ const mockShipmentTracking: ShipmentTracking[] = [
         checkPost: "Chicago Hub",
         city: "Chicago",
         stateOrProvince: "IL",
-        country: "USA",
-        characteristics: []
+        country: "USA"
       },
       {
         status: "in-transit",
@@ -100,32 +142,14 @@ const mockShipmentTracking: ShipmentTracking[] = [
         checkPost: "Boston Distribution Center",
         city: "Boston",
         stateOrProvince: "MA",
-        country: "USA",
-        characteristics: []
+        country: "USA"
       }
     ],
-    order: [
-      {
-        id: "ORD12345",
-        href: "string",
-        name: "Customer Order",
-        referredType: "CustomerOrder"
-      }
-    ],
-    relatedCustomer: {
-      id: "CUST-789",
-      href: "string",
-      name: "John Doe",
-      description: "Premium customer"
-    },
     createDate: "2025-05-14T09:15:22.000Z",
-    characteristics: [],
     shippingOrderItems: [
       {
         id: 1,
-        name: "APP iPhone 15 128GB Blue",
-        characteristics: [],
-        relatedEntities: []
+        name: "APP iPhone 15 128GB Blue"
       }
     ]
   }
@@ -164,7 +188,7 @@ const ShipmentTrackingDrawer = ({ orderId }: ShipmentTrackingDrawerProps) => {
     }
   };
 
-  const formatAddress = (address: any) => {
+  const formatAddress = (address: ShipmentAddress) => {
     const parts = [];
     if (address.fullAddressName) parts.push(address.fullAddressName);
     if (address.streetNr || address.streetName) {
@@ -182,23 +206,23 @@ const ShipmentTrackingDrawer = ({ orderId }: ShipmentTrackingDrawerProps) => {
   };
 
   return (
-    <Drawer>
-      <DrawerTrigger asChild>
-        <Button className="bg-primary hover:bg-primary/90">
-          <Truck className="mr-2 h-4 w-4" />
-          Shipment Tracking
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="default" className="flex items-center gap-2">
+          <Truck className="h-4 w-4" />
+          Track Shipment
         </Button>
-      </DrawerTrigger>
-      <DrawerContent className="h-[90vh]">
-        <DrawerHeader className="text-left">
-          <DrawerTitle className="text-xl">Shipment Tracking</DrawerTitle>
-          <DrawerDescription>
+      </SheetTrigger>
+      <SheetContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-xl overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle className="text-xl">Shipment Tracking</SheetTitle>
+          <SheetDescription>
             Tracking information for order {orderId || ""}
-          </DrawerDescription>
-        </DrawerHeader>
-        <ScrollArea className="h-[80vh] px-4">
+          </SheetDescription>
+        </SheetHeader>
+        <ScrollArea className="h-[calc(100vh-120px)] mt-6">
           {shipments.length > 0 ? (
-            <div className="space-y-6 pb-10">
+            <div className="space-y-6">
               {shipments.map((shipment) => (
                 <div key={shipment.id} className="space-y-4">
                   {/* Shipment Overview */}
@@ -347,8 +371,8 @@ const ShipmentTrackingDrawer = ({ orderId }: ShipmentTrackingDrawerProps) => {
             </div>
           )}
         </ScrollArea>
-      </DrawerContent>
-    </Drawer>
+      </SheetContent>
+    </Sheet>
   );
 };
 

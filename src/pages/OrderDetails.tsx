@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import ShipmentTrackingDrawer from "@/components/orders/ShipmentTrackingDrawer";
 
 const OrderDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -56,19 +57,22 @@ const OrderDetails = () => {
         </div>
       ) : order ? (
         <div className="space-y-6">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-              className="p-0 h-9 w-9"
-            >
-              <ArrowLeft size={18} />
-            </Button>
-            <h1 className="text-2xl font-bold">Order {order.orderNumber}</h1>
-            <Badge className={getStatusColor(order.status)}>
-              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-            </Badge>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate(-1)}
+                className="p-0 h-9 w-9"
+              >
+                <ArrowLeft size={18} />
+              </Button>
+              <h1 className="text-2xl font-bold">Order {order.orderNumber}</h1>
+              <Badge className={getStatusColor(order.status)}>
+                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+              </Badge>
+            </div>
+            <ShipmentTrackingDrawer orderId={id} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

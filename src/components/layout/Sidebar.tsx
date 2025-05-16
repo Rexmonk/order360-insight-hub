@@ -11,7 +11,7 @@ import {
 
 interface NavItemProps {
   to: string;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: React.ElementType;
   label: string;
   collapsed: boolean;
 }
