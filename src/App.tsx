@@ -24,7 +24,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useLocalStorage("token", "");
   return (
     <>
-      {/* /Bypass MSAL login for local copy JWT token from dev or uat */}
+      {/* /Bypass MSAL login for local copy JWT token from dev or uat  also remove this and token check in apiclient.ts file after development is complate*/}
 
       {token ? (
         children

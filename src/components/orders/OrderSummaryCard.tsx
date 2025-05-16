@@ -1,7 +1,18 @@
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, ClockIcon, CircleCheck, AlertTriangle, Clock } from "lucide-react";
+import {
+  CalendarIcon,
+  ClockIcon,
+  CircleCheck,
+  AlertTriangle,
+  Clock,
+} from "lucide-react";
 import { format } from "date-fns";
 import { MobileOrder } from "@/types/order";
 
@@ -82,11 +93,9 @@ const OrderSummaryCard = ({ order }: OrderSummaryCardProps) => {
                 </span>
               </Badge>
             </div>
-            <CardDescription>
-              ID: {order.id.substring(0, 8)}...
-            </CardDescription>
+            <CardDescription>ID: {order.id.substring(0, 8)}...</CardDescription>
           </div>
-          
+
           <div className="flex flex-col items-end gap-1 text-sm text-gray-500">
             <div className="flex items-center gap-1">
               <CalendarIcon className="h-4 w-4" />

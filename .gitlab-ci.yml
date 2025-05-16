@@ -1,0 +1,128 @@
+image: $DOCKER_WORKER_IMAGE
+
+variables:
+  IMAGE_NAME: $MTR_URL/oneapp/$CI_PROJECT_NAME
+  DOCKER_IMAGE_EXPIRES: '30d'
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+
+include:
+  # - project: 'oneapp/apps/cicd-common'
+  #   file: 'docker/container-scanning.yaml'
+  #   ref: 'master'
+  - project: 'oneapp/apps/cicd-common'
+    file: 'docker/build-publish-image-clean.yaml'
+    ref: 'master'
+  - project: 'oneapp/apps/cicd-common'
+    file: 'docker/sign-image.yaml'
+    ref: 'master'
+  - project: 'oneapp/apps/cicd-common'
+    file: 'helm/build-and-publish.yaml'
+    ref: 'master'
+  - project: 'oneapp/apps/cicd-common'
+    file: 'helm/deploy-values.yaml'
+    ref: 'master'
+  - project: 'oneapp/apps/cicd-common'
+    file: 'aws/gitlab-ci-oidc.yaml'
+    ref: 'master'
+  # - project: 'oneapp/apps/cicd-common'
+  #   file: 'code-quality/code-quality.yaml'
+  #   ref: 'master'
+  # - template: 'Security/Container-Scanning.gitlab-ci.yml'
+  - template: 'Security/SAST.gitlab-ci.yml'
+  - template: 'Security/Dependency-Scanning.gitlab-ci.yml'
+  - template: 'Security/Secret-Detection.gitlab-ci.yml'
+  - local: 'ui/ui-stages/setup.yaml'
+  - local: 'ui/ui-stages/build.yaml'
+  - local: 'ui/ui-stages/test.yaml'
+  - local: 'ui/ui-stages/publish.yaml'
+  - local: 'ui/ui-stages/announcement.yaml'
+  - local: 'ui/ui-stages/deploy.yaml'
+
+stages:
+  - setup
+  - build
+  - test
+  - publish
+  - announcement
+  - deploy
+
+default:
+  tags:
+    - otc_run_sysbox_s
+
+.node_image:
+  image: mtr.devops.telekom.de/oneapp/node:18.16-alpine
+
+.cache:
+  cache:
+    key:
+      prefix: $CI_COMMIT_REF_SLUG
+      files:
+        - package.json
+    paths:
+      - node_modules/
+    policy: pull
+
+.add-origin:
+  before_script:
+    - git remote remove origin
+    - git remote add origin https://oauth2:$CI_TAG_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH
+    - git config user.email "oa-whiskey@telekom.de"
+    - git config user.name "🤖 GitLab CI/CD"
+
+.runner:
+  tags:
+    - otc_run_sysbox_m
+
+# this disables merge request pipelines which would be triggered if a new commit is pushed to an open merge request
+# https://medium.com/devops-with-valentine/fix-gitlab-ci-duplicate-pipelines-in-merge-requests-when-using-rules-9a1486994f3a
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: always
+    - if: $CI_COMMIT_BRANCH
+
+# container_scanning:
+#   # variables:
+#   #   http_proxy: http://proxy.devops.telekom.de:3128
+#   #   https_proxy: http://proxy.devops.telekom.de:3128
+#   tags:
+#   - otc_run_sysbox_l
+
+.scanning_repo:
+  image: registry.gitlab.com/security-products/container-scanning:6
+  variables:
+    GIT_STRATEGY: none
+    CS_IMAGE: $IMAGE_NAME:$IMAGE_VERSION
+  allow_failure: true
+  script:
+    - env
+    - mkdir -p ~/.docker
+    - echo $DOCKER_AUTH_CONFIG > ~/.docker/config.json
+    - gtcs scan
+  artifacts:
+    reports:
+      container_scanning: gl-container-scanning-report.json
+      dependency_scanning: gl-dependency-scanning-report.json
+    paths:
+      - gl-container-scanning-report.json
+      - gl-dependency-scanning-report.json
+      - "**/gl-sbom-*.cdx.json"
+  tags:
+    - otc_run_sysbox_m
+
+# variables:
+#   WORKER_IMAGE: "2.0"
+#   HELM_NAMESPACE: mapi-pom-order360-ui
+#   INGRESS_HOST_DEV: pommes-ui.oneapp.dev.hal.telekom.de
+#   INGRESS_HOST_TESTSTABLE: pommes-ui.oneapp.teststable.hal.telekom.de
+#   INGRESS_HOST_UAT: pommes-ui.oneapp.uat.hal.telekom.de
+#   INGRESS_HOST_PROD_REF: pommes-ui.oneapp.prod-ref.hal.telekom.de
+#   INGRESS_HOST_PROD: pommes-ui.oneapp.prod.hal.telekom.de
+# include:
+#   - project: 'oneapp/teams/whiskey/ci'
+#     ref: ${CI_PROJECT_BRANCH}
+#     file:
+#       - 'ui/ui-pipeline.yaml'

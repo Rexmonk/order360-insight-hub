@@ -7,7 +7,6 @@ export const useLocalStorage = <T,>(
   const [storedValue, setStoredValue] = useState(() => {
     try {
       const item = window.localStorage.getItem(key);
-      console.log("item", item);
       return item ? item : initialValue;
     } catch (error) {
       console.error("Error reading from localStorage", error);
@@ -17,7 +16,7 @@ export const useLocalStorage = <T,>(
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(key, JSON.stringify(storedValue));
+      window.localStorage.setItem(key, storedValue);
     } catch (error) {
       console.error("Error writing to localStorage", error);
     }

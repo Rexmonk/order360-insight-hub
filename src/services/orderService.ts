@@ -1,8 +1,28 @@
+import { crudService } from "./crudService";
 
+export interface ValidFor {
+  startDateTime: string;
+  endDateTime: string;
+}
+
+export interface StateItem {
+  id: string;
+  state: string;
+  description: string;
+  subStateDescription?: string;
+  validFor: ValidFor;
+}
+
+export interface OrderItem {
+  businessProcess: string;
+  productOffering: { id: string; name: string };
+}
 export interface Order {
+  stateChanges: StateItem[];
+  orderItems: OrderItem[];
   id: string;
   publicIdentifier: string;
-  channel: string;
+  channel: { id: string };
   businessProcess: string;
   state: string;
   offeringId: string;
@@ -19,89 +39,125 @@ export interface Order {
 }
 
 // States for orders
-const states = ['Created', 'Accepted', 'In Progress', 'Completed', 'Canceled'];
+const states = ["Created", "Accepted", "In Progress", "Completed", "Canceled"];
 
 // Channels
-const channels = ['Online', 'Mobile', 'Retail', 'Call Center', 'Partner'];
+const channels = ["Online", "Mobile", "Retail", "Call Center", "Partner"];
 
 // Business Processes
-const businessProcesses = ['New Order', 'Change Order', 'Cancel Order', 'Upgrade', 'Downgrade'];
+const businessProcesses = [
+  "New Order",
+  "Change Order",
+  "Cancel Order",
+  "Upgrade",
+  "Downgrade",
+];
 
 // Sample offerings
 const offerings = [
-  { id: 'OFF-001', name: 'Basic Internet' },
-  { id: 'OFF-002', name: 'Premium Internet' },
-  { id: 'OFF-003', name: 'Mobile Plan' },
-  { id: 'OFF-004', name: 'TV Package' },
-  { id: 'OFF-005', name: 'Business Internet' },
+  { id: "OFF-001", name: "Basic Internet" },
+  { id: "OFF-002", name: "Premium Internet" },
+  { id: "OFF-003", name: "Mobile Plan" },
+  { id: "OFF-004", name: "TV Package" },
+  { id: "OFF-005", name: "Business Internet" },
 ];
 
 // Generate mock order data
 function generateMockOrders(count: number): Order[] {
   const orders: Order[] = [];
-  
+
   for (let i = 1; i <= count; i++) {
-    const orderDate = new Date(Date.now() - Math.floor(Math.random() * 90) * 24 * 60 * 60 * 1000);
-    const lastUpdatedDate = new Date(orderDate.getTime() + Math.floor(Math.random() * 7) * 24 * 60 * 60 * 1000);
+    const orderDate = new Date(
+      Date.now() - Math.floor(Math.random() * 90) * 24 * 60 * 60 * 1000
+    );
+    const lastUpdatedDate = new Date(
+      orderDate.getTime() + Math.floor(Math.random() * 7) * 24 * 60 * 60 * 1000
+    );
     const offering = offerings[Math.floor(Math.random() * offerings.length)];
-    
+
     orders.push({
-      id: `ORD-${String(i).padStart(6, '0')}`,
-      publicIdentifier: `PI-${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
+      id: `ORD-${String(i).padStart(6, "0")}`,
+      publicIdentifier: `PI-${Math.random()
+        .toString(36)
+        .substring(2, 10)
+        .toUpperCase()}`,
       channel: channels[Math.floor(Math.random() * channels.length)],
-      businessProcess: businessProcesses[Math.floor(Math.random() * businessProcesses.length)],
+      businessProcess:
+        businessProcesses[Math.floor(Math.random() * businessProcesses.length)],
       state: states[Math.floor(Math.random() * states.length)],
       offeringId: offering.id,
       offeringName: offering.name,
       orderDate: orderDate.toISOString(),
       lastUpdatedDate: lastUpdatedDate.toISOString(),
-      partyId: `PARTY-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-      profileId: `PROFILE-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+      partyId: `PARTY-${Math.random()
+        .toString(36)
+        .substring(2, 8)
+        .toUpperCase()}`,
+      profileId: `PROFILE-${Math.random()
+        .toString(36)
+        .substring(2, 8)
+        .toUpperCase()}`,
       salesOrganization: `SALES-${Math.floor(Math.random() * 5) + 1}`,
       group: `GROUP-${String.fromCharCode(65 + Math.floor(Math.random() * 5))}`,
       details: generateOrderDetails(offering.id),
     });
   }
-  
+
   return orders;
 }
 
 function generateOrderDetails(offeringId: string) {
   // Generate different details based on offering type
   switch (offeringId) {
-    case 'OFF-001':
-    case 'OFF-002':
-    case 'OFF-005':
+    case "OFF-001":
+    case "OFF-002":
+    case "OFF-005":
       return {
         internetSpeed: `${Math.floor(Math.random() * 900) + 100} Mbps`,
-        installationDate: new Date(Date.now() + Math.floor(Math.random() * 14) * 24 * 60 * 60 * 1000).toISOString(),
+        installationDate: new Date(
+          Date.now() + Math.floor(Math.random() * 14) * 24 * 60 * 60 * 1000
+        ).toISOString(),
         contractLength: `${Math.floor(Math.random() * 2) + 1} year`,
         location: {
           address: `${Math.floor(Math.random() * 999) + 1} Main St`,
-          city: 'Cityville',
-          state: 'CA',
-          zip: '90210'
+          city: "Cityville",
+          state: "CA",
+          zip: "90210",
         },
         price: Math.floor(Math.random() * 50) + 50,
-        currency: 'USD'
+        currency: "USD",
       };
-    case 'OFF-003':
+    case "OFF-003":
       return {
-        planType: ['Basic', 'Standard', 'Premium'][Math.floor(Math.random() * 3)],
+        planType: ["Basic", "Standard", "Premium"][
+          Math.floor(Math.random() * 3)
+        ],
         dataAllowance: `${Math.floor(Math.random() * 100) + 1}GB`,
-        phoneNumber: `(${Math.floor(Math.random() * 900) + 100}) ${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 9000) + 1000}`,
-        activationDate: new Date(Date.now() + Math.floor(Math.random() * 7) * 24 * 60 * 60 * 1000).toISOString(),
+        phoneNumber: `(${Math.floor(Math.random() * 900) + 100}) ${
+          Math.floor(Math.random() * 900) + 100
+        }-${Math.floor(Math.random() * 9000) + 1000}`,
+        activationDate: new Date(
+          Date.now() + Math.floor(Math.random() * 7) * 24 * 60 * 60 * 1000
+        ).toISOString(),
         price: Math.floor(Math.random() * 40) + 30,
-        currency: 'USD'
+        currency: "USD",
       };
-    case 'OFF-004':
+    case "OFF-004":
       return {
-        packageName: ['Basic', 'Entertainment', 'Sports', 'Premium', 'All-Inclusive'][Math.floor(Math.random() * 5)],
+        packageName: [
+          "Basic",
+          "Entertainment",
+          "Sports",
+          "Premium",
+          "All-Inclusive",
+        ][Math.floor(Math.random() * 5)],
         channels: Math.floor(Math.random() * 200) + 50,
-        installationDate: new Date(Date.now() + Math.floor(Math.random() * 10) * 24 * 60 * 60 * 1000).toISOString(),
+        installationDate: new Date(
+          Date.now() + Math.floor(Math.random() * 10) * 24 * 60 * 60 * 1000
+        ).toISOString(),
         contractLength: `${Math.floor(Math.random() * 2) + 1} year`,
         price: Math.floor(Math.random() * 60) + 40,
-        currency: 'USD'
+        currency: "USD",
       };
     default:
       return {};
@@ -122,28 +178,28 @@ export const getOrderMetrics = () => {
 // Mock distribution data
 export const getChannelDistribution = () => {
   return [
-    { name: 'Online', count: 345, percentage: 45.6 },
-    { name: 'Mobile', count: 198, percentage: 26.2 },
-    { name: 'Retail', count: 87, percentage: 11.5 },
-    { name: 'Call Center', count: 95, percentage: 12.6 },
-    { name: 'Partner', count: 31, percentage: 4.1 },
+    { name: "Online", count: 345, percentage: 45.6 },
+    { name: "Mobile", count: 198, percentage: 26.2 },
+    { name: "Retail", count: 87, percentage: 11.5 },
+    { name: "Call Center", count: 95, percentage: 12.6 },
+    { name: "Partner", count: 31, percentage: 4.1 },
   ];
 };
 
 export const getBusinessDistribution = () => {
   return [
-    { name: 'New Order', count: 413, percentage: 54.6 },
-    { name: 'Change Order', count: 158, percentage: 20.9 },
-    { name: 'Upgrade', count: 98, percentage: 13.0 },
-    { name: 'Downgrade', count: 56, percentage: 7.4 },
-    { name: 'Cancel Order', count: 31, percentage: 4.1 },
+    { name: "New Order", count: 413, percentage: 54.6 },
+    { name: "Change Order", count: 158, percentage: 20.9 },
+    { name: "Upgrade", count: 98, percentage: 13.0 },
+    { name: "Downgrade", count: 56, percentage: 7.4 },
+    { name: "Cancel Order", count: 31, percentage: 4.1 },
   ];
 };
 
 // Mock weekly trends
 export const getWeeklyTrends = () => {
-  const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-  
+  const weeks = ["Week 1", "Week 2", "Week 3", "Week 4"];
+
   return {
     weeklyOrders: {
       weeks,
@@ -164,8 +220,8 @@ export const getWeeklyTrends = () => {
 // Mock orders data for table
 const mockOrders = generateMockOrders(100);
 
-export const getOrders = (
-  page: number = 1, 
+export const getOrders = async (
+  page: number = 1,
   pageSize: number = 10,
   filters: {
     search?: string;
@@ -176,108 +232,32 @@ export const getOrders = (
     dateFrom?: string;
     dateTo?: string;
   } = {}
-): { orders: Order[]; totalCount: number } => {
-  let filteredOrders = [...mockOrders];
-  
-  // Apply filters
-  if (filters.search && filters.searchType) {
-    const search = filters.search.toLowerCase();
-    
-    if (filters.searchType === 'orderId') {
-      filteredOrders = filteredOrders.filter(order => 
-        order.id.toLowerCase().includes(search)
-      );
-    } else {
-      if (filters.searchType === 'partyId') {
-        filteredOrders = filteredOrders.filter(order => 
-          order.partyId.toLowerCase().includes(search)
-        );
-      }
-      
-      if (filters.searchType === 'offeringId') {
-        filteredOrders = filteredOrders.filter(order => 
-          order.offeringId.toLowerCase().includes(search)
-        );
-      }
-      
-      if (filters.searchType === 'profileId') {
-        filteredOrders = filteredOrders.filter(order => 
-          order.profileId.toLowerCase().includes(search)
-        );
-      }
-      
-      if (filters.searchType === 'salesOrganization') {
-        filteredOrders = filteredOrders.filter(order => 
-          order.salesOrganization.toLowerCase().includes(search)
-        );
-      }
-      
-      // Apply dropdown filters when not searching by orderId
-      if (filters.channel) {
-        filteredOrders = filteredOrders.filter(order => 
-          order.channel === filters.channel
-        );
-      }
-      
-      if (filters.businessProcess) {
-        filteredOrders = filteredOrders.filter(order => 
-          order.businessProcess === filters.businessProcess
-        );
-      }
-      
-      if (filters.state) {
-        filteredOrders = filteredOrders.filter(order => 
-          order.state === filters.state
-        );
-      }
-    }
-  } else {
-    // Apply dropdown filters when there's no search
-    if (filters.channel) {
-      filteredOrders = filteredOrders.filter(order => 
-        order.channel === filters.channel
-      );
-    }
-    
-    if (filters.businessProcess) {
-      filteredOrders = filteredOrders.filter(order => 
-        order.businessProcess === filters.businessProcess
-      );
-    }
-    
-    if (filters.state) {
-      filteredOrders = filteredOrders.filter(order => 
-        order.state === filters.state
-      );
-    }
-  }
-  
-  // Apply date range filter
-  if (filters.dateFrom && filters.dateTo) {
-    const fromDate = new Date(filters.dateFrom);
-    const toDate = new Date(filters.dateTo);
-    
-    filteredOrders = filteredOrders.filter(order => {
-      const orderDate = new Date(order.orderDate);
-      return orderDate >= fromDate && orderDate <= toDate;
+): Promise<{ orders: Order[]; totalCount: number }> => {
+  try {
+    // Prepare query parameters
+    const params: Record<string, any> = {
+      page,
+      pageSize,
+      ...filters,
+    };
+
+    // Make API request using crudService
+    const response = await crudService.get<{
+      orders: Order[];
+      totalCount: number;
+    }>({
+      endpoint: "orders",
+      params,
     });
+
+    return response;
+  } catch (error) {
+    console.log("Error fetching orders:", error);
   }
-  
-  const totalCount = filteredOrders.length;
-  
-  // Apply pagination
-  const start = (page - 1) * pageSize;
-  const end = start + pageSize;
-  const paginatedOrders = filteredOrders.slice(start, end);
-  
-  return {
-    orders: paginatedOrders,
-    totalCount,
-  };
 };
 
 export const getOrderById = (id: string): Order | undefined => {
-  return mockOrders.find(order => order.id === id);
+  return mockOrders.find((order) => order.id === id);
 };
 
 export const getBpmnDiagramXml = (): string => {
