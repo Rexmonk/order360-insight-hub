@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import OrderDetailsView from "@/components/orders/OrderDetailsView";
-import ShipmentTrackingDrawer from "@/components/orders/ShipmentTrackingDrawer";
 
 const OrderDetails = () => {
   const location = useLocation();

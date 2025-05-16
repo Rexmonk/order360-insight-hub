@@ -111,5 +111,4 @@ export interface MobileOrder extends Order {
   }>;
 }
 
-// Re-export types properly
-export type { Order, OrderItem, StateItem, MobileOrder };
+// No need to re-export types that are already exported above
