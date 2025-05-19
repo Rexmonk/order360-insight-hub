@@ -79,7 +79,7 @@ const OrderDetails = () => {
             
             {/* Action buttons organized in a visually appealing way */}
             <div className="flex flex-wrap gap-3">
-              <div className="action-buttons-container flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-3 items-center">
                 <ProductInventoryDrawer orderId={id} />
                 <SalesCommissionDrawer orderId={id} />
                 <ShipmentTrackingDrawer orderId={id} />
