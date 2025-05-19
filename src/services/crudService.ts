@@ -1,6 +1,7 @@
 
 import apiClient from './apiClient';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
+import type { Order } from '@/types/order';
 
 // Generic type for CRUD operations
 interface CrudOptions<T = any, R = any> {

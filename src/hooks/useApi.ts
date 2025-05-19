@@ -2,6 +2,7 @@
 import { useQuery, useMutation, UseQueryOptions, UseMutationOptions, QueryClient } from '@tanstack/react-query';
 import { crudService, createResourceService } from '@/services/crudService';
 import { toast } from 'sonner';
+import type { Order } from '@/types/order';
 
 // Initialize query client for global use
 export const queryClient = new QueryClient({
@@ -99,10 +100,10 @@ export const createApiHooks = <T, R = T>(resourceEndpoint: string) => {
   
   return {
     useGetAll: (params?: Record<string, any>, options?: UseQueryOptions<T[], ApiError>) => 
-      useApiQuery<T[]>([resourceEndpoint, params], resourceEndpoint, undefined, params, options),
+      useApiQuery<T[]>([resourceEndpoint, JSON.stringify(params)], resourceEndpoint, undefined, params, options),
     
     useGetById: (id: string | number, options?: UseQueryOptions<T, ApiError>) => 
-      useApiQuery<T>([resourceEndpoint, id], resourceEndpoint, id, undefined, options),
+      useApiQuery<T>([resourceEndpoint, String(id)], resourceEndpoint, id, undefined, options),
     
     useCreate: (options?: UseMutationOptions<R, ApiError, T>) => 
       useApiCreate<T, R>(resourceEndpoint, {
@@ -120,7 +121,7 @@ export const createApiHooks = <T, R = T>(resourceEndpoint: string) => {
       useApiUpdate<T, R>(resourceEndpoint, id, {
         onSuccess: () => {
           toast.success('Successfully updated');
-          queryClient.invalidateQueries({ queryKey: [resourceEndpoint, id] });
+          queryClient.invalidateQueries({ queryKey: [resourceEndpoint, String(id)] });
           queryClient.invalidateQueries({ queryKey: [resourceEndpoint] });
         },
         onError: (error) => {
@@ -133,7 +134,7 @@ export const createApiHooks = <T, R = T>(resourceEndpoint: string) => {
       useApiPatch<T, R>(resourceEndpoint, id, {
         onSuccess: () => {
           toast.success('Successfully updated');
-          queryClient.invalidateQueries({ queryKey: [resourceEndpoint, id] });
+          queryClient.invalidateQueries({ queryKey: [resourceEndpoint, String(id)] });
           queryClient.invalidateQueries({ queryKey: [resourceEndpoint] });
         },
         onError: (error) => {

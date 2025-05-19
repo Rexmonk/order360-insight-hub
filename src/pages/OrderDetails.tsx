@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import ShipmentTrackingDrawer from "@/components/orders/ShipmentTrackingDrawer";
+import SalesCommissionDrawer from "@/components/orders/SalesCommissionDrawer";
 import { Toaster } from "@/components/ui/toaster";
 
 const OrderDetails = () => {
@@ -74,7 +75,10 @@ const OrderDetails = () => {
                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
               </Badge>
             </div>
-            <ShipmentTrackingDrawer orderId={id} />
+            <div className="flex gap-2">
+              <SalesCommissionDrawer orderId={id} />
+              <ShipmentTrackingDrawer orderId={id} />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
