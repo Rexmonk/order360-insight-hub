@@ -77,13 +77,11 @@ const OrderDetails = () => {
               </Badge>
             </div>
             
-            {/* Action buttons organized in a visually appealing way */}
-            <div className="flex flex-wrap gap-3">
-              <div className="flex flex-wrap gap-3 items-center">
-                <ProductInventoryDrawer orderId={id} />
-                <SalesCommissionDrawer orderId={id} />
-                <ShipmentTrackingDrawer orderId={id} />
-              </div>
+            {/* Action buttons in a more standard, consistent layout */}
+            <div className="flex flex-wrap gap-2">
+              <ProductInventoryDrawer orderId={id} />
+              <SalesCommissionDrawer orderId={id} />
+              <ShipmentTrackingDrawer orderId={id} />
             </div>
           </div>
 
