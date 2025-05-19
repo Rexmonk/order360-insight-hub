@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import ShipmentTrackingDrawer from "@/components/orders/ShipmentTrackingDrawer";
 import SalesCommissionDrawer from "@/components/orders/SalesCommissionDrawer";
+import ProductInventoryDrawer from "@/components/orders/ProductInventoryDrawer";
 import { Toaster } from "@/components/ui/toaster";
 
 const OrderDetails = () => {
@@ -60,7 +61,7 @@ const OrderDetails = () => {
         </div>
       ) : order ? (
         <div className="space-y-6">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
@@ -75,7 +76,10 @@ const OrderDetails = () => {
                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
               </Badge>
             </div>
-            <div className="flex gap-2">
+            
+            {/* Action buttons organized in a responsive grid */}
+            <div className="flex flex-wrap gap-2">
+              <ProductInventoryDrawer orderId={id} />
               <SalesCommissionDrawer orderId={id} />
               <ShipmentTrackingDrawer orderId={id} />
             </div>

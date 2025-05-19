@@ -21,6 +21,14 @@ export interface ApiError {
   errors?: Record<string, string[]>;
 }
 
+// Type for API response with pagination
+export interface ApiPaginatedResponse<T> {
+  data: T[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+}
+
 // Hook for GET operations
 export const useApiQuery = <T>(
   queryKey: string | string[],
@@ -35,6 +43,24 @@ export const useApiQuery = <T>(
     queryKey: queryKeyArray,
     queryFn: async () => {
       return crudService.get<T>({ endpoint, id, params });
+    },
+    ...options,
+  });
+};
+
+// Hook for GET operations with pagination
+export const useApiPaginatedQuery = <T>(
+  queryKey: string | string[],
+  endpoint: string,
+  params?: Record<string, any>,
+  options?: UseQueryOptions<ApiPaginatedResponse<T>, ApiError>
+) => {
+  const queryKeyArray = Array.isArray(queryKey) ? queryKey : [queryKey];
+  
+  return useQuery<ApiPaginatedResponse<T>, ApiError>({
+    queryKey: queryKeyArray,
+    queryFn: async () => {
+      return crudService.get<ApiPaginatedResponse<T>>({ endpoint, params });
     },
     ...options,
   });
@@ -101,6 +127,9 @@ export const createApiHooks = <T, R = T>(resourceEndpoint: string) => {
   return {
     useGetAll: (params?: Record<string, any>, options?: UseQueryOptions<T[], ApiError>) => 
       useApiQuery<T[]>([resourceEndpoint, JSON.stringify(params)], resourceEndpoint, undefined, params, options),
+    
+    useGetAllPaginated: (params?: Record<string, any>, options?: UseQueryOptions<ApiPaginatedResponse<T>, ApiError>) => 
+      useApiPaginatedQuery<T>([resourceEndpoint, JSON.stringify(params)], resourceEndpoint, params, options),
     
     useGetById: (id: string | number, options?: UseQueryOptions<T, ApiError>) => 
       useApiQuery<T>([resourceEndpoint, String(id)], resourceEndpoint, id, undefined, options),
