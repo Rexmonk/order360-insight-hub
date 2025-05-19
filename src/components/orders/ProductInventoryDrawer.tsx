@@ -1,34 +1,47 @@
 
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { Package, AlertCircle, FileCheck, Clock, Tag } from "lucide-react";
-import { format } from "date-fns";
-import { ProductInventory } from "@/types/product";
-import { crudService } from "@/services/crudService";
+import { Package } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
+  DrawerFooter,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
+import { ProductInventory } from "@/types/product";
+import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { crudService } from "@/services/crudService";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface ProductInventoryDrawerProps {
-  orderId: string | undefined;
+  orderId?: string;
 }
 
-export default function ProductInventoryDrawer({ orderId }: ProductInventoryDrawerProps) {
+const ProductInventoryDrawer = ({ orderId }: ProductInventoryDrawerProps) => {
+  const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [productInventory, setProductInventory] = useState<ProductInventory | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const formatDate = (dateString: string): string => {
+    try {
+      return format(new Date(dateString), "MMM dd, yyyy");
+    } catch (error) {
+      return "Invalid date";
+    }
+  };
 
   const fetchProductInventory = async () => {
     if (!orderId) {
@@ -41,7 +54,6 @@ export default function ProductInventoryDrawer({ orderId }: ProductInventoryDraw
     }
 
     setIsLoading(true);
-    setError(null);
 
     try {
       // In a real application, you would use the orderId to fetch the product inventory
@@ -53,9 +65,8 @@ export default function ProductInventoryDrawer({ orderId }: ProductInventoryDraw
         title: "Success",
         description: "Product inventory data loaded",
       });
-    } catch (err) {
-      console.error("Error fetching product inventory:", err);
-      setError("Failed to load product inventory data");
+    } catch (error) {
+      console.error("Error fetching product inventory:", error);
       toast({
         title: "Error",
         description: "Failed to load product inventory data",
@@ -173,11 +184,10 @@ export default function ProductInventoryDrawer({ orderId }: ProductInventoryDraw
     }
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), "MMM dd, yyyy");
-    } catch (error) {
-      return "Invalid date";
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open) {
+      fetchProductInventory();
     }
   };
 
@@ -201,50 +211,29 @@ export default function ProductInventoryDrawer({ orderId }: ProductInventoryDraw
   };
 
   return (
-    <Drawer>
+    <Drawer open={isOpen} onOpenChange={handleOpenChange} direction="right">
       <DrawerTrigger asChild>
-        <Button 
-          variant="outline" 
-          className="gap-2" 
-          onClick={fetchProductInventory}
-        >
+        <Button variant="outline" className="flex items-center gap-2">
           <Package className="h-4 w-4" />
           <span>Product Inventory</span>
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="max-h-[90vh] overflow-y-auto">
+      <DrawerContent side="right" className="w-[90vw] sm:max-w-md md:max-w-lg lg:max-w-xl">
         <DrawerHeader>
-          <DrawerTitle className="text-xl flex items-center gap-2">
-            <Package className="h-5 w-5" />
-            Product Inventory
-          </DrawerTitle>
+          <DrawerTitle>Product Inventory</DrawerTitle>
           <DrawerDescription>
-            View product inventory details for this order
+            Product details for order {orderId}
           </DrawerDescription>
         </DrawerHeader>
-
-        <div className="px-4 py-2">
-          {isLoading && (
-            <div className="space-y-4">
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-32 w-full" />
-              <Skeleton className="h-32 w-full" />
-              <Skeleton className="h-20 w-full" />
+        <ScrollArea className="h-[calc(100vh-200px)] px-4">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+              <span className="ml-3">Loading product data...</span>
             </div>
-          )}
-
-          {error && !productInventory && (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <AlertCircle className="h-12 w-12 text-red-500 mb-2" />
-              <h3 className="text-lg font-medium">Failed to load data</h3>
-              <p className="text-gray-500 mb-4">{error}</p>
-              <Button onClick={fetchProductInventory}>Try Again</Button>
-            </div>
-          )}
-
-          {productInventory && (
-            <div className="space-y-6">
-              {/* Product Summary Card */}
+          ) : productInventory ? (
+            <div className="space-y-6 pb-6">
+              {/* Product Summary */}
               <Card>
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
@@ -296,10 +285,7 @@ export default function ProductInventoryDrawer({ orderId }: ProductInventoryDraw
               {/* Product Offering */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Tag className="h-5 w-5" />
-                    Product Offering
-                  </CardTitle>
+                  <CardTitle>Product Offering</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <dl className="space-y-2">
@@ -315,14 +301,28 @@ export default function ProductInventoryDrawer({ orderId }: ProductInventoryDraw
                 </CardContent>
               </Card>
 
-              {/* Pricing Information */}
+              {/* Product Characteristics */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Product Characteristics</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {productInventory.productCharacteristics.map((char) => (
+                      <div key={char.name} className="border p-2 rounded-md">
+                        <dt className="text-sm font-medium">{char.name}</dt>
+                        <dd className="text-sm truncate">{char.value}</dd>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Product Prices */}
               {productInventory.productPrices.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Tag className="h-5 w-5" />
-                      Pricing Information
-                    </CardTitle>
+                    <CardTitle>Pricing</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {productInventory.productPrices.map((price) => (
@@ -342,16 +342,13 @@ export default function ProductInventoryDrawer({ orderId }: ProductInventoryDraw
                           <div>
                             <span className="text-sm font-medium text-gray-500">Billing Period</span>
                             <p>
-                              {price.recurringChargeDuration} {price.recurringChargePeriod}(s)
+                              {price.recurringChargePeriod}
+                              {price.recurringChargeDuration > 1 && ` (${price.recurringChargeDuration})`}
                             </p>
                           </div>
-                          <div>
-                            <span className="text-sm font-medium text-gray-500">Valid From</span>
-                            <p>{formatDate(price.validFor.startDateTime)}</p>
-                          </div>
-                          <div>
-                            <span className="text-sm font-medium text-gray-500">Valid Until</span>
-                            <p>{formatDate(price.validFor.endDateTime)}</p>
+                          <div className="sm:col-span-2">
+                            <span className="text-sm font-medium text-gray-500">Valid</span>
+                            <p>{formatDate(price.validFor.startDateTime)} - {formatDate(price.validFor.endDateTime)}</p>
                           </div>
                         </div>
                       </div>
@@ -364,42 +361,29 @@ export default function ProductInventoryDrawer({ orderId }: ProductInventoryDraw
               {productInventory.agreements.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileCheck className="h-5 w-5" />
-                      Agreements
-                    </CardTitle>
+                    <CardTitle>Agreements</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {productInventory.agreements.map((agreement) => (
                       <div key={agreement.id} className="border p-4 rounded-md">
-                        <div className="flex justify-between items-center">
-                          <h4 className="font-medium">Agreement: {agreement.id}</h4>
-                          <Badge
-                            className={agreement.status === "terminationRequested"
-                              ? "bg-orange-100 text-orange-800 border-orange-200 border"
-                              : "bg-blue-100 text-blue-800 border-blue-200 border"}
-                          >
-                            {agreement.status}
-                          </Badge>
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-medium">Agreement {agreement.id}</h4>
+                          <Badge variant="outline">{agreement.status}</Badge>
                         </div>
-                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div className="mt-3 space-y-2">
                           <div>
-                            <span className="text-sm font-medium text-gray-500">Start Date</span>
-                            <p>{formatDate(agreement.agreementPeriod.startDateTime)}</p>
+                            <span className="text-sm font-medium text-gray-500">Period</span>
+                            <p>
+                              {formatDate(agreement.agreementPeriod.startDateTime)} - {formatDate(agreement.agreementPeriod.endDateTime)}
+                            </p>
                           </div>
                           <div>
-                            <span className="text-sm font-medium text-gray-500">End Date</span>
-                            <p>{formatDate(agreement.agreementPeriod.endDateTime)}</p>
+                            <span className="text-sm font-medium text-gray-500">Notice Period</span>
+                            <p>{agreement.noticePeriod.timePeriod} {agreement.noticePeriod.type}(s)</p>
                           </div>
                           <div>
                             <span className="text-sm font-medium text-gray-500">Cancel Until</span>
                             <p>{formatDate(agreement.cancelUntilDate)}</p>
-                          </div>
-                          <div>
-                            <span className="text-sm font-medium text-gray-500">Duration</span>
-                            <p>
-                              {agreement.duration.timePeriod} {agreement.duration.type}(s)
-                            </p>
                           </div>
                         </div>
                       </div>
@@ -408,65 +392,16 @@ export default function ProductInventoryDrawer({ orderId }: ProductInventoryDraw
                 </Card>
               )}
 
-              {/* Product Characteristics */}
-              {productInventory.productCharacteristics.length > 0 && (
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center gap-2">
-                      <FileCheck className="h-5 w-5" />
-                      Product Characteristics
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="border rounded-md overflow-hidden">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                            >
-                              Name
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                            >
-                              Value
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {productInventory.productCharacteristics.map((char, index) => (
-                            <tr key={`${char.name}-${index}`}>
-                              <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {char.name}
-                              </td>
-                              <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
-                                {char.value}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
               {/* Realizing Services */}
               {productInventory.realizingServices.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Clock className="h-5 w-5" />
-                      Realizing Services
-                    </CardTitle>
+                    <CardTitle>Realizing Services</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
                       {productInventory.realizingServices.map((service) => (
-                        <div key={service.id} className="border p-3 rounded-md">
+                        <div key={service.id} className="border p-4 rounded-md">
                           <h4 className="font-medium">{service.name}</h4>
                           <p className="text-sm text-gray-500">ID: {service.id}</p>
                           <p className="text-sm text-gray-500">Version: {service.version}</p>
@@ -476,16 +411,65 @@ export default function ProductInventoryDrawer({ orderId }: ProductInventoryDraw
                   </CardContent>
                 </Card>
               )}
+
+              {/* Accounts */}
+              {productInventory.accounts.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Accounts</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {productInventory.accounts.map((account) => (
+                        <div key={account.id} className="border p-3 rounded-md">
+                          <h4 className="font-medium">{account.name}</h4>
+                          <div className="grid grid-cols-2 gap-2 mt-2">
+                            <div>
+                              <span className="text-sm text-gray-500">ID</span>
+                              <p className="text-sm">{account.id}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm text-gray-500">Type</span>
+                              <p className="text-sm">{account.accountType}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm text-gray-500">Role</span>
+                              <p className="text-sm">{account.role}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Raw JSON View */}
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="raw-json">
+                  <AccordionTrigger>Raw JSON Data</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="bg-gray-50 p-4 rounded-md overflow-auto max-h-96">
+                      <pre className="text-xs whitespace-pre-wrap">
+                        {JSON.stringify(productInventory, null, 2)}
+                      </pre>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+          ) : (
+            <div className="text-center py-12 text-gray-500">
+              No product inventory data available
             </div>
           )}
-        </div>
-
+        </ScrollArea>
         <DrawerFooter>
-          <DrawerClose asChild>
-            <Button variant="outline">Close</Button>
-          </DrawerClose>
+          <Button variant="outline" onClick={() => setIsOpen(false)}>Close</Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
   );
-}
+};
+
+export default ProductInventoryDrawer;
