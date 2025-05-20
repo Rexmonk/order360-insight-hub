@@ -90,12 +90,15 @@ const OrderDetails = () => {
               </div>
             </div>
             
-            <div className="flex flex-wrap gap-2 w-full md:w-auto">
-              {/* Primary Action Buttons */}
-              <div className="flex gap-2">
-                <ShipmentTrackingDrawer orderId={id} />
-                <SalesCommissionDrawer orderId={id} />
-              </div>
+            <div className="flex gap-2">
+              {/* Primary buttons */}
+              <Button 
+                variant="default"
+                onClick={() => navigate(`/bpmn-diagram/${id}`)}
+              >
+                View Order Flow
+              </Button>
+              <ShipmentTrackingDrawer orderId={id} />
               
               {/* Secondary Actions in Dropdown */}
               <DropdownMenu>
@@ -110,6 +113,9 @@ const OrderDetails = () => {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <CustomerDataDrawer orderId={id} />
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <SalesCommissionDrawer orderId={id} />
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <AddressManagementDrawer orderId={id} />

@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import OrderOverview from "./pages/OrderOverview";
 import OrderDetails from "./pages/OrderDetails";
+import BpmnDiagram from "./pages/BpmnDiagram";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -64,6 +65,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <OrderDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bpmn-diagram/:id"
+            element={
+              <ProtectedRoute>
+                <BpmnDiagram />
               </ProtectedRoute>
             }
           />
