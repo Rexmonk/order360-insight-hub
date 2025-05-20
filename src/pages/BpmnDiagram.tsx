@@ -269,8 +269,6 @@ const BpmnDiagram = () => {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Key</TableHead>
-                    <TableHead>Process Instance Key</TableHead>
-                    <TableHead>Scope Key</TableHead>
                     <TableHead>Value</TableHead>
                     <TableHead>Truncated</TableHead>
                     <TableHead>Actions</TableHead>
@@ -281,8 +279,6 @@ const BpmnDiagram = () => {
                     <TableRow key={variable.key}>
                       <TableCell className="font-medium">{variable.name}</TableCell>
                       <TableCell>{variable.key}</TableCell>
-                      <TableCell>{variable.processInstanceKey}</TableCell>
-                      <TableCell>{variable.scopeKey}</TableCell>
                       <TableCell className="max-w-md">
                         <pre className="bg-gray-50 p-2 rounded text-xs overflow-auto max-h-60">
                           {formatJsonValue(variable.value, !!expandedVariables[variable.key])}
