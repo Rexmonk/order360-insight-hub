@@ -5,10 +5,11 @@ import { useParams } from "react-router-dom";
 import { getBpmnDiagramXml, getOrder, getProcessVariables } from "@/services/orderService";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ZoomIn, ZoomOut, Move, RotateCcw } from "lucide-react";
+import { ArrowLeft, ZoomIn, ZoomOut, Move, RotateCcw, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import BpmnJS from "bpmn-js/dist/bpmn-navigated-viewer.production.min.js";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 
 const BpmnDiagram = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +19,7 @@ const BpmnDiagram = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentZoom, setCurrentZoom] = useState<number>(1);
+  const [expandedVariables, setExpandedVariables] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
   
   // Refs for the BPMN viewer and container
@@ -145,17 +147,34 @@ const BpmnDiagram = () => {
     }
   };
 
-  // Format JSON value for display
-  const formatJsonValue = (value: string) => {
+  // Toggle variable expansion
+  const toggleVariableExpansion = (key: string) => {
+    setExpandedVariables(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  // Format JSON value for display with truncation
+  const formatJsonValue = (value: string, isExpanded: boolean) => {
     try {
       // If it's a JSON string (with quotes), parse it
+      let formattedValue = value;
+      
       if (value.startsWith('"') && value.endsWith('"')) {
-        return value.substring(1, value.length - 1);
+        formattedValue = value.substring(1, value.length - 1);
+      } else if (value.startsWith('{') || value.startsWith('[')) {
+        // If it's a JSON object, try to parse and format it
+        const parsedValue = JSON.parse(value);
+        formattedValue = JSON.stringify(parsedValue, null, 2);
       }
       
-      // If it's a JSON object, try to parse and format it
-      const parsedValue = JSON.parse(value);
-      return JSON.stringify(parsedValue, null, 2);
+      // Truncate large values if not expanded
+      if (!isExpanded && formattedValue.length > 100) {
+        return formattedValue.substring(0, 100) + '...';
+      }
+      
+      return formattedValue;
     } catch (e) {
       return value;
     }
@@ -245,21 +264,45 @@ const BpmnDiagram = () => {
               <CardTitle>Process Variables</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {processVariables.items.map((variable: any) => (
-                  <div
-                    key={variable.key}
-                    className="p-4 border rounded-md bg-gray-50"
-                  >
-                    <h3 className="font-medium text-gray-800">{variable.name}</h3>
-                    <div className="mt-1">
-                      <pre className="bg-white p-2 rounded border text-xs overflow-auto max-h-24">
-                        {formatJsonValue(variable.value)}
-                      </pre>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Key</TableHead>
+                    <TableHead>Process Instance Key</TableHead>
+                    <TableHead>Scope Key</TableHead>
+                    <TableHead>Value</TableHead>
+                    <TableHead>Truncated</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {processVariables.items.map((variable: any) => (
+                    <TableRow key={variable.key}>
+                      <TableCell className="font-medium">{variable.name}</TableCell>
+                      <TableCell>{variable.key}</TableCell>
+                      <TableCell>{variable.processInstanceKey}</TableCell>
+                      <TableCell>{variable.scopeKey}</TableCell>
+                      <TableCell className="max-w-md">
+                        <pre className="bg-gray-50 p-2 rounded text-xs overflow-auto max-h-60">
+                          {formatJsonValue(variable.value, !!expandedVariables[variable.key])}
+                        </pre>
+                      </TableCell>
+                      <TableCell>{variable.truncated ? 'Yes' : 'No'}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleVariableExpansion(variable.key)}
+                          title={expandedVariables[variable.key] ? "Collapse value" : "Expand value"}
+                        >
+                          {expandedVariables[variable.key] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         )}
