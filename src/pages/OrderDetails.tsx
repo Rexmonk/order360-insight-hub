@@ -16,6 +16,9 @@ import {
 import ShipmentTrackingDrawer from "@/components/orders/ShipmentTrackingDrawer";
 import SalesCommissionDrawer from "@/components/orders/SalesCommissionDrawer";
 import ProductInventoryDrawer from "@/components/orders/ProductInventoryDrawer";
+import CustomerDataDrawer from "@/components/orders/CustomerDataDrawer";
+import AddressManagementDrawer from "@/components/orders/AddressManagementDrawer";
+import ProductCatalogDrawer from "@/components/orders/ProductCatalogDrawer";
 import { Toaster } from "@/components/ui/toaster";
 
 const OrderDetails = () => {
@@ -77,11 +80,14 @@ const OrderDetails = () => {
               </Badge>
             </div>
             
-            {/* Action buttons in a more standard, consistent layout */}
-            <div className="flex flex-wrap gap-2">
+            {/* Action buttons in a more organized layout */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-2">
               <ProductInventoryDrawer orderId={id} />
               <SalesCommissionDrawer orderId={id} />
               <ShipmentTrackingDrawer orderId={id} />
+              <CustomerDataDrawer orderId={id} />
+              <AddressManagementDrawer orderId={id} />
+              <ProductCatalogDrawer orderId={id} />
             </div>
           </div>
 
