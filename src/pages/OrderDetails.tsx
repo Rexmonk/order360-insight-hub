@@ -13,6 +13,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import ShipmentTrackingDrawer from "@/components/orders/ShipmentTrackingDrawer";
 import SalesCommissionDrawer from "@/components/orders/SalesCommissionDrawer";
 import ProductInventoryDrawer from "@/components/orders/ProductInventoryDrawer";
@@ -64,7 +72,7 @@ const OrderDetails = () => {
         </div>
       ) : order ? (
         <div className="space-y-6">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
@@ -74,20 +82,43 @@ const OrderDetails = () => {
               >
                 <ArrowLeft size={18} />
               </Button>
-              <h1 className="text-2xl font-bold">Order {order.orderNumber}</h1>
-              <Badge className={getStatusColor(order.status)}>
-                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-              </Badge>
+              <div>
+                <h1 className="text-2xl font-bold">Order {order.orderNumber}</h1>
+                <Badge className={getStatusColor(order.status)}>
+                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                </Badge>
+              </div>
             </div>
             
-            {/* Action buttons in a more organized layout */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-2">
-              <ProductInventoryDrawer orderId={id} />
-              <SalesCommissionDrawer orderId={id} />
-              <ShipmentTrackingDrawer orderId={id} />
-              <CustomerDataDrawer orderId={id} />
-              <AddressManagementDrawer orderId={id} />
-              <ProductCatalogDrawer orderId={id} />
+            <div className="flex flex-wrap gap-2 w-full md:w-auto">
+              {/* Primary Action Buttons */}
+              <div className="flex gap-2">
+                <ShipmentTrackingDrawer orderId={id} />
+                <SalesCommissionDrawer orderId={id} />
+              </div>
+              
+              {/* Secondary Actions in Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">More Actions</Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Additional Information</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <ProductInventoryDrawer orderId={id} />
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <CustomerDataDrawer orderId={id} />
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <AddressManagementDrawer orderId={id} />
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <ProductCatalogDrawer orderId={id} />
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
