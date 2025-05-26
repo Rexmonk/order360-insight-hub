@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import {
@@ -9,6 +10,7 @@ import {
   Clock,
   UnfoldVertical,
   FoldVertical,
+  Truck,
 } from "lucide-react";
 import { format } from "date-fns";
 import {
@@ -35,6 +37,21 @@ import { useState } from "react";
 import { Collapsible, CollapsibleTrigger } from "../ui/collapsible";
 import { CollapsibleContent } from "@radix-ui/react-collapsible";
 import ShipmentTrackingDrawer from "./ShipmentTrackingDrawer";
+import SalesCommissionDrawer from "./SalesCommissionDrawer";
+import ProductInventoryDrawer from "./ProductInventoryDrawer";
+import ProductCatalogDrawer from "./ProductCatalogDrawer";
+import AddressManagementDrawer from "./AddressManagementDrawer";
+import CustomerDataDrawer from "./CustomerDataDrawer";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { crudService } from "@/services/crudService";
+import { useToast } from "@/hooks/use-toast";
 
 interface OrderDetailsViewProps {
   order: any;
@@ -44,6 +61,7 @@ const OrderDetailsView = ({ order }: OrderDetailsViewProps) => {
   const navigate = useNavigate();
 
   const [toggleOrderItem, setToggleOrderItem] = useState({});
+  const { toast } = useToast();
 
   const formatDate = (dateString: string) => {
     try {
@@ -625,19 +643,64 @@ const OrderDetailsView = ({ order }: OrderDetailsViewProps) => {
                   key={appointment.id || `appointment-${index}`}
                   className="bg-blue-50 p-4 rounded-md border border-blue-200"
                 >
-                  <h3 className="font-medium">
-                    Appointment ID: {appointment.id}
-                  </h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-medium text-lg">
+                      Appointment ID: {appointment.id}
+                    </h3>
+                    <Clock className="h-5 w-5 text-blue-600" />
+                  </div>
+                  
+                  {/* Time Slot Reference */}
+                  {appointment.timeSlotRef && (
+                    <div className="mb-3 p-3 bg-white rounded border border-blue-100">
+                      <h4 className="font-medium text-sm text-blue-800 mb-2">
+                        Time Slot Reference
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-xs font-medium text-gray-500">Time Slot ID:</span>
+                          <p className="text-sm">{appointment.timeSlotRef.id}</p>
+                        </div>
+                        {appointment.timeSlotRef.validFor && (
+                          <>
+                            <div>
+                              <span className="text-xs font-medium text-gray-500">Slot Start:</span>
+                              <p className="text-sm">
+                                {formatDate(appointment.timeSlotRef.validFor.startDateTime)}
+                              </p>
+                            </div>
+                            <div>
+                              <span className="text-xs font-medium text-gray-500">Slot End:</span>
+                              <p className="text-sm">
+                                {formatDate(appointment.timeSlotRef.validFor.endDateTime)}
+                              </p>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Appointment Validity Period */}
                   {appointment.validFor && (
-                    <div className="mt-2">
-                      <p className="text-sm">
-                        <span className="font-medium">Start:</span>{" "}
-                        {formatDate(appointment.validFor.startDateTime)}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium">End:</span>{" "}
-                        {formatDate(appointment.validFor.endDateTime)}
-                      </p>
+                    <div className="p-3 bg-white rounded border border-blue-100">
+                      <h4 className="font-medium text-sm text-blue-800 mb-2">
+                        Appointment Schedule
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-xs font-medium text-gray-500">Start:</span>
+                          <p className="text-sm">
+                            {formatDate(appointment.validFor.startDateTime)}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-xs font-medium text-gray-500">End:</span>
+                          <p className="text-sm">
+                            {formatDate(appointment.validFor.endDateTime)}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
